@@ -41,7 +41,8 @@ class Login extends Component {
     }
 
   handleClick(event){
-    var apiBaseUrl = "http://localhost:5000/api/";
+//    var apiBaseUrl = "http://localhost:5000/api/";
+    var apiBaseUrl = "https://http://onon-api.herokuapp.com/api"  // for deployment
     var self = this;
     var payload={
       "email":this.state.username,
