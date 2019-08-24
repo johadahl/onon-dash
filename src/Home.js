@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import AppBar from 'material-ui/AppBar';
+import Dashboard from './Dashboard'
 
 class App extends Component {
   constructor(props) {
@@ -10,13 +13,17 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        Hello World!
+        <MuiThemeProvider>
+        <Dashboard />
         <div>
           {this.state.currentScreen}
         </div>
+
+        </MuiThemeProvider>
       </div>
     );
   }
 }
 
 export default App;
+

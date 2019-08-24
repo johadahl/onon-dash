@@ -10,13 +10,13 @@ class App extends Component {
       uploadScreen:[]
     }
   }
+  
   componentWillMount(){
     var loginPage =[];
     loginPage.push(<Loginscreen parentContext={this}/>);
-    this.setState({
-                  loginPage:loginPage
-                    })
+    this.setState({loginPage:loginPage})
   }
+
   render() {
     return (
       <div className="App">

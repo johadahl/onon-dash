@@ -3,7 +3,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import axios from 'axios';
-import UploadScreen from './UploadScreen';
+import Home from './Home';
 
 class Login extends Component {
   constructor(props){
@@ -52,11 +52,10 @@ class Login extends Component {
     .then(function (response) {
       console.log(response);
       if(response.data.code === 200){
-        alert("Success")
         console.log("Login successfull");
-        var uploadScreen=[];
-        uploadScreen.push(<UploadScreen appContext={self.props.appContext}/>)
-        self.props.appContext.setState({loginPage:[],uploadScreen:uploadScreen})
+        var next=[];
+        next.push(<Home appContext={self.props.appContext}/>)
+        self.props.appContext.setState({loginPage:[],uploadScreen:next})
       }
       else{
         console.log("Unsuccessful login");
