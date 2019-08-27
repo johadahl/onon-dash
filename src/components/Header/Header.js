@@ -3,17 +3,14 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  InputBase,
   Menu,
   MenuItem,
-  Fab,
 } from "@material-ui/core";
 import {
   Menu as MenuIcon,
   NotificationsNone as NotificationsIcon,
   Person as AccountIcon,
   Lock as LogOutIcon,
-  Send as SendIcon,
   ArrowBack as ArrowBackIcon,
 } from "@material-ui/icons";
 import classNames from "classnames";
@@ -24,7 +21,6 @@ import useStyles from "./styles";
 // components
 import { Badge, Typography } from "../Wrappers/Wrappers";
 import Notification from "../Notification/Notification";
-import UserAvatar from "../UserAvatar/UserAvatar";
 
 // context
 import {
@@ -65,8 +61,6 @@ export default function Header(props) {
   var userDispatch = useUserDispatch();
 
   // local
-  var [mailMenu, setMailMenu] = useState(null);
-  var [isMailsUnread, setIsMailsUnread] = useState(true);
   var [notificationsMenu, setNotificationsMenu] = useState(null);
   var [isNotificationsUnread, setIsNotificationsUnread] = useState(true);
   var [profileMenu, setProfileMenu] = useState(null);

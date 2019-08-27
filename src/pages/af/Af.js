@@ -4,11 +4,6 @@ import MUIDataTable from "mui-datatables";
 
 // components
 import PageTitle from "../../components/PageTitle";
-import Widget from "../../components/Widget";
-import Table from "../dashboard/components/Table/Table";
-
-// data
-import mock from "../dashboard/mock";
 
 const datatableData = [
   ["1", "VW-Syd", "Helsingborg", "40330", "38", "100%", "+3"],

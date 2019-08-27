@@ -4,18 +4,15 @@ import MUIDataTable from "mui-datatables";
 
 // components
 import PageTitle from "../../components/PageTitle";
-import Widget from "../../components/Widget";
-import Table from "../dashboard/components/Table/Table";
 
-// data
-import mock from "../dashboard/mock";
-
+// Mock data
 const datatableData = [
   ["1", "Rolf Thomander", "11001", "Stockholm", "38", "100%", "+1"],
   ["2", "Pontus Karlsson", "40330", "Helsingborg", "15", "99%", "+3"],
   ["3", "Martin Roxtröm", "40993", "Smista", "12", "90%", "+5"],
 ];
 
+// Table settings
 const columns = [{
   name: "rank",
   label: "Rank",

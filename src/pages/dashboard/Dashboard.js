@@ -1,22 +1,15 @@
 import React, { useState } from "react";
 import {
   Grid,
-  LinearProgress,
-  Select,
-  OutlinedInput,
-  MenuItem,
 } from "@material-ui/core";
 import { useTheme } from "@material-ui/styles";
 import {
   ResponsiveContainer,
-  ComposedChart,
   CartesianGrid,
   Tooltip,
   Legend,
-  AreaChart,
   LineChart,
   Line,
-  Area,
   PieChart,
   Pie,
   Sector,
@@ -29,13 +22,10 @@ import {
 import useStyles from "./styles";
 
 // components
-import mock from "./mock";
 import Widget from "../../components/Widget";
 import PageTitle from "../../components/PageTitle";
 import { Typography } from "../../components/Wrappers";
 import Dot from "../../components/Sidebar/components/Dot";
-import Table from "./components/Table/Table";
-import BigStat from "./components/BigStat/BigStat";
 import MUIDataTable from "mui-datatables";
 
 // Mock-data
@@ -182,20 +172,6 @@ const surveyColumns = [{
   {
   name:"top",
   label:"Top 20%"}]
-
-const reasonColumns = [{
-  name: "qid",
-  label:""},
-  {
-  name:"af",
-  label:"ÅF"},
-  {
-  name:"trend",
-  label:"Trend"},
-  {
-  name:"sve",
-  label:"Landssnitt"},
-  ]
 
 const tableOptions = {
   selectableRows:'none',
