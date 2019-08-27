@@ -27,13 +27,12 @@ export default makeStyles(theme => ({
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    alignItems: "flex-end",
+    alignItems: "center",
     marginRight: theme.spacing(1),
   },
   legendItemContainer: {
     display: "flex",
     alignItems: "center",
-    marginBottom: theme.spacing(1),
   },
   fullHeightBody: {
     display: "flex",

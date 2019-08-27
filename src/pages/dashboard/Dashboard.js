@@ -10,12 +10,16 @@ import { useTheme } from "@material-ui/styles";
 import {
   ResponsiveContainer,
   ComposedChart,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   AreaChart,
   LineChart,
   Line,
   Area,
   PieChart,
   Pie,
+  Sector,
   Cell,
   YAxis,
   XAxis,
@@ -32,379 +36,345 @@ import { Typography } from "../../components/Wrappers";
 import Dot from "../../components/Sidebar/components/Dot";
 import Table from "./components/Table/Table";
 import BigStat from "./components/BigStat/BigStat";
+import MUIDataTable from "mui-datatables";
 
-const mainChartData = getMainChartData();
-const PieChartData = [
-  { name: "Group A", value: 400, color: "primary" },
-  { name: "Group B", value: 300, color: "secondary" },
-  { name: "Group C", value: 300, color: "warning" },
-  { name: "Group D", value: 200, color: "success" },
+// Mock-data
+const lineChartData = [
+  {
+    name: "Okt",
+    ind: 40,
+    af: 60,
+    all: 50,
+  },
+  {
+    name: "Nov",
+    ind: 42,
+    af: 58,
+    all: 51,
+  },
+  {
+    name: "Dec",
+    ind: 45,
+    af: 62,
+    all: 57,
+  },
+  {
+    name: "Jan",
+    ind: 66,
+    af: 70,
+    all: 51,
+  },
+  {
+    name: "Feb",
+    ind: 74,
+    af: 65,
+    all: 62,
+  },
+  {
+    name: "Mar",
+    ind: 60,
+    af: 57,
+    all: 76,
+  },
+  {
+    name: "Apr",
+    ind: 55,
+    af: 64,
+    all: 68,
+  },
+  {
+    name: "Maj",
+    ind: 65,
+    af: 72,
+    all: 64,
+  },
+  {
+    name: "Jun",
+    ind: 68,
+    af: 76,
+    all: 67,
+  },
+  {
+    name: "Jul",
+    ind: 72,
+    af: 70,
+    all: 77,
+  },
+  {
+    name: "Aug",
+    ind: 88,
+    af: 80,
+    all: 89,
+  },
 ];
+
+const surveyData = [
+  ["Kundomhändertagandet, totalt sett?", "4.38", "+", "4.15", "+", "3.82", "4.5"],
+  ["Mottagandet vid besöket", "4.38", "+", "4.15", "+", "3.82", "4.5"],
+  ["Säljarens vänlighet", "4.38", "+", "4.15", "+", "3.82", "4.5"],
+  ["Säljarens kunnande", "4.38", "+", "4.15", "+", "3.82", "4.5"],
+  ["Förklaring av bilens egenskaper", "4.38", "+", "4.15", "+", "3.82", "4.5"],
+  ["Förklaring av offerten", "4.38", "+", "4.15", "+", "3.82", "4.5"],
+  ["Säljarens engagemang?", "4.38", "+", "4.15", "+", "3.82", "4.5"],
+  ["Villighet att acceptera inbytet", "4.38", "+", "4.15", "+", "3.82", "4.5"],
+];
+
+const reasonData = [
+  { 
+    qid: 1, 
+    name: "Fann ingen produkt som tilltalade mig", 
+    af: 24, 
+    trend: "+", 
+    sve: 14, 
+    color: "warning" },
+  { 
+    qid: 2, 
+    name: "Säljaren hörde inte av sig", 
+    af: 11, 
+    trend: "-", 
+    sve: 16, 
+    color: "secondary" },
+  { 
+    qid: 3, 
+    name: "Jag sökte endast information", 
+    af: 39, 
+    trend: "+", 
+    sve: 40, 
+    color: "primary" },
+  { 
+    qid: 4, 
+    name: "Fick bättre erbjudande från annat håll", 
+    af: 27, 
+    trend: "-", 
+    sve: 30, 
+    color: "success" },
+];
+
+const alternativeData = [
+  {name:"Volkswagen", value:17},
+  {name:"Volvo", value:13},
+  {name:"Audi", value:9},
+  {name:"BMW", value:4},
+  {name:"Kia", value:17},
+  {name:"Skoda", value:0},
+  {name:"Annat", value:39},
+];
+
+// Chart settings
+const surveyColumns = [{
+  name: "question",
+  label: "Fråga"},
+  {
+  name: "ind",
+  label:"Individuellt"},
+  {
+  name:"indtrend",
+  label:"Trend"},
+  {
+  name:"af",
+  label:"Återförsäljare"},
+  {
+  name:"aftrend",
+  label:"Trend"},
+  {
+  name:"sve",
+  label:"Landssnitt"},
+  {
+  name:"top",
+  label:"Top 20%"}]
+
+const reasonColumns = [{
+  name: "qid",
+  label:""},
+  {
+  name:"af",
+  label:"ÅF"},
+  {
+  name:"trend",
+  label:"Trend"},
+  {
+  name:"sve",
+  label:"Landssnitt"},
+  ]
+
+const tableOptions = {
+  selectableRows:'none',
+  print:false,
+  pagination:false,
+  viewColumns:false,
+  search:false,
+  download:false,
+  filter:false,
+  elevation:0  
+};
 
 export default function Dashboard(props) {
   var classes = useStyles();
   var theme = useTheme();
+  var [activeIndex, setActiveIndexId] = useState(0);
 
-  // local
-  var [mainChartState, setMainChartState] = useState("monthly");
 
   return (
     <>
-      <PageTitle title="Dashboard" button="Latest Reports" />
+      <PageTitle title="Mia Pettersson - 44033" button="Senaste Rapporten" />
       <Grid container spacing={4}>
-        <Grid item lg={3} md={4} sm={6} xs={12}>
-          <Widget
-            title="Visits Today"
-            upperTitle
-            bodyClass={classes.fullHeightBody}
-            className={classes.card}
-          >
-            <div className={classes.visitsNumberContainer}>
-              <Typography size="xl" weight="medium">
-                12, 678
+      
+        <Grid item xs={12}>
+          <Widget title="Offertuppföljning" upperTitle disableWidgetMenu>
+              <Typography> 
+                Andel som svarat ja till <i> "Efter besöket/erhållen offert, kontaktade säljaren dig för att följa upp?"</i>
               </Typography>
+            <ResponsiveContainer width="100%" height={350}>
               <LineChart
-                width={55}
-                height={30}
-                data={[
-                  { value: 10 },
-                  { value: 15 },
-                  { value: 10 },
-                  { value: 17 },
-                  { value: 18 },
-                ]}
-                margin={{ left: theme.spacing(2) }}
+                width="100%"
+                height={300}
+                data={lineChartData}
+                margin={{
+                  top: 20,
+                  right: 40,
+                  bottom: 5,
+                }}
               >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis domain={[0, 100]}/>
+                <Tooltip />
+                <Legend />
                 <Line
-                  type="natural"
-                  dataKey="value"
+                  type="monotone"
+                  dataKey="ind"
+                  name="Individuellt"
+                  stroke={theme.palette.warning.main}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="af"
+                  name="Återförsäljare"
+                  stroke={theme.palette.primary.main}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="all"
+                  name="Genomsnitt Sverige"
                   stroke={theme.palette.success.main}
-                  strokeWidth={2}
-                  dot={false}
                 />
               </LineChart>
-            </div>
-            <Grid
-              container
-              direction="row"
-              justify="space-between"
-              alignItems="center"
-            >
-              <Grid item>
-                <Typography color="text" colorBrightness="secondary">
-                  Registrations
-                </Typography>
-                <Typography size="md">860</Typography>
-              </Grid>
-              <Grid item>
-                <Typography color="text" colorBrightness="secondary">
-                  Sign Out
-                </Typography>
-                <Typography size="md">32</Typography>
-              </Grid>
-              <Grid item>
-                <Typography color="text" colorBrightness="secondary">
-                  Rate
-                </Typography>
-                <Typography size="md">3.25%</Typography>
-              </Grid>
-            </Grid>
-          </Widget>
-        </Grid>
-        <Grid item lg={3} md={8} sm={6} xs={12}>
-          <Widget
-            title="App Performance"
-            upperTitle
-            className={classes.card}
-            bodyClass={classes.fullHeightBody}
-          >
-            <div className={classes.performanceLegendWrapper}>
-              <div className={classes.legendElement}>
-                <Dot color="warning" />
-                <Typography
-                  color="text"
-                  colorBrightness="secondary"
-                  className={classes.legendElementText}
-                >
-                  Integration
-                </Typography>
-              </div>
-              <div className={classes.legendElement}>
-                <Dot color="primary" />
-                <Typography
-                  color="text"
-                  colorBrightness="secondary"
-                  className={classes.legendElementText}
-                >
-                  SDK
-                </Typography>
-              </div>
-            </div>
-            <div className={classes.progressSection}>
-              <Typography
-                size="md"
-                color="text"
-                colorBrightness="secondary"
-                className={classes.progressSectionTitle}
-              >
-                Integration
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={30}
-                classes={{ barColorPrimary: classes.progressBar }}
-                className={classes.progress}
-              />
-            </div>
-            <div>
-              <Typography
-                size="md"
-                color="text"
-                colorBrightness="secondary"
-                className={classes.progressSectionTitle}
-              >
-                SDK
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={55}
-                classes={{ barColorPrimary: classes.progressBar }}
-                className={classes.progress}
-              />
-            </div>
-          </Widget>
-        </Grid>
-        <Grid item lg={3} md={8} sm={6} xs={12}>
-          <Widget
-            title="Server Overview"
-            upperTitle
-            className={classes.card}
-            bodyClass={classes.fullHeightBody}
-          >
-            <div className={classes.serverOverviewElement}>
-              <Typography
-                color="text"
-                colorBrightness="secondary"
-                className={classes.serverOverviewElementText}
-              >
-                60% / 37°С / 3.3 Ghz
-              </Typography>
-              <div className={classes.serverOverviewElementChartWrapper}>
-                <ResponsiveContainer height={50} width="99%">
-                  <AreaChart data={getRandomData(10)}>
-                    <Area
-                      type="natural"
-                      dataKey="value"
-                      stroke={theme.palette.secondary.main}
-                      fill={theme.palette.secondary.light}
-                      strokeWidth={2}
-                      fillOpacity="0.25"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-            <div className={classes.serverOverviewElement}>
-              <Typography
-                color="text"
-                colorBrightness="secondary"
-                className={classes.serverOverviewElementText}
-              >
-                54% / 31°С / 3.3 Ghz
-              </Typography>
-              <div className={classes.serverOverviewElementChartWrapper}>
-                <ResponsiveContainer height={50} width="99%">
-                  <AreaChart data={getRandomData(10)}>
-                    <Area
-                      type="natural"
-                      dataKey="value"
-                      stroke={theme.palette.primary.main}
-                      fill={theme.palette.primary.light}
-                      strokeWidth={2}
-                      fillOpacity="0.25"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-            <div className={classes.serverOverviewElement}>
-              <Typography
-                color="text"
-                colorBrightness="secondary"
-                className={classes.serverOverviewElementText}
-              >
-                57% / 21°С / 3.3 Ghz
-              </Typography>
-              <div className={classes.serverOverviewElementChartWrapper}>
-                <ResponsiveContainer height={50} width="99%">
-                  <AreaChart data={getRandomData(10)}>
-                    <Area
-                      type="natural"
-                      dataKey="value"
-                      stroke={theme.palette.warning.main}
-                      fill={theme.palette.warning.light}
-                      strokeWidth={2}
-                      fillOpacity="0.25"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </Widget>
-        </Grid>
-        <Grid item lg={3} md={4} sm={6} xs={12}>
-          <Widget title="Revenue Breakdown" upperTitle className={classes.card}>
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <ResponsiveContainer width="100%" height={144}>
-                  <PieChart margin={{ left: theme.spacing(2) }}>
-                    <Pie
-                      data={PieChartData}
-                      innerRadius={45}
-                      outerRadius={60}
-                      dataKey="value"
-                    >
-                      {PieChartData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={theme.palette[entry.color].main}
-                        />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-              </Grid>
-              <Grid item xs={6}>
-                <div className={classes.pieChartLegendWrapper}>
-                  {PieChartData.map(({ name, value, color }, index) => (
-                    <div key={color} className={classes.legendItemContainer}>
-                      <Dot color={color} />
-                      <Typography style={{ whiteSpace: "nowrap" }}>
-                        &nbsp;{name}&nbsp;
-                      </Typography>
-                      <Typography color="text" colorBrightness="secondary">
-                        &nbsp;{value}
-                      </Typography>
-                    </div>
-                  ))}
-                </div>
-              </Grid>
-            </Grid>
-          </Widget>
-        </Grid>
-        <Grid item xs={12}>
-          <Widget
-            bodyClass={classes.mainChartBody}
-            header={
-              <div className={classes.mainChartHeader}>
-                <Typography
-                  variant="h5"
-                  color="text"
-                  colorBrightness="secondary"
-                >
-                  Daily Line Chart
-                </Typography>
-                <div className={classes.mainChartHeaderLabels}>
-                  <div className={classes.mainChartHeaderLabel}>
-                    <Dot color="warning" />
-                    <Typography className={classes.mainChartLegentElement}>
-                      Tablet
-                    </Typography>
-                  </div>
-                  <div className={classes.mainChartHeaderLabel}>
-                    <Dot color="primary" />
-                    <Typography className={classes.mainChartLegentElement}>
-                      Mobile
-                    </Typography>
-                  </div>
-                  <div className={classes.mainChartHeaderLabel}>
-                    <Dot color="primary" />
-                    <Typography className={classes.mainChartLegentElement}>
-                      Desktop
-                    </Typography>
-                  </div>
-                </div>
-                <Select
-                  value={mainChartState}
-                  onChange={e => setMainChartState(e.target.value)}
-                  input={
-                    <OutlinedInput
-                      labelWidth={0}
-                      classes={{
-                        notchedOutline: classes.mainChartSelectRoot,
-                        input: classes.mainChartSelect,
-                      }}
-                    />
-                  }
-                  autoWidth
-                >
-                  <MenuItem value="daily">Daily</MenuItem>
-                  <MenuItem value="weekly">Weekly</MenuItem>
-                  <MenuItem value="monthly">Monthly</MenuItem>
-                </Select>
-              </div>
-            }
-          >
-            <ResponsiveContainer width="100%" minWidth={500} height={350}>
-              <ComposedChart
-                margin={{ top: 0, right: -15, left: -15, bottom: 0 }}
-                data={mainChartData}
-              >
-                <YAxis
-                  ticks={[0, 2500, 5000, 7500]}
-                  tick={{ fill: theme.palette.text.hint + "80", fontSize: 14 }}
-                  stroke={theme.palette.text.hint + "80"}
-                  tickLine={false}
-                />
-                <XAxis
-                  tickFormatter={i => i + 1}
-                  tick={{ fill: theme.palette.text.hint + "80", fontSize: 14 }}
-                  stroke={theme.palette.text.hint + "80"}
-                  tickLine={false}
-                />
-                <Area
-                  type="natural"
-                  dataKey="desktop"
-                  fill={theme.palette.background.light}
-                  strokeWidth={0}
-                  activeDot={false}
-                />
-                <Line
-                  type="natural"
-                  dataKey="mobile"
-                  stroke={theme.palette.primary.main}
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={false}
-                />
-                <Line
-                  type="linear"
-                  dataKey="tablet"
-                  stroke={theme.palette.warning.main}
-                  strokeWidth={2}
-                  dot={{
-                    stroke: theme.palette.warning.dark,
-                    strokeWidth: 2,
-                    fill: theme.palette.warning.main,
-                  }}
-                />
-              </ComposedChart>
             </ResponsiveContainer>
           </Widget>
         </Grid>
-        {mock.bigStat.map(stat => (
-          <Grid item md={4} sm={6} xs={12} key={stat.product}>
-            <BigStat {...stat} />
-          </Grid>
-        ))}
+
         <Grid item xs={12}>
-          <Widget
-            title="Support Requests"
-            upperTitle
-            noBodyPadding
-            bodyClass={classes.tableWidget}
-          >
-            <Table data={mock.table} />
+          <Widget title="Kundfeedback" upperTitle disableWidgetMenu>
+            <Typography> 
+              Valfri text som beskriver resultatet och hur det ska tolkas
+            </Typography>
+            <MUIDataTable
+              data={surveyData}
+              columns={surveyColumns}
+              options={tableOptions}
+            />
+          </Widget>
+        </Grid>
+
+        <Grid item xs={6} >
+          <Widget title="Varför blev det inte en affär?" upperTitle disableWidgetMenu>
+            <Typography> 
+              Valfri text som beskriver resultatet och hur det ska tolkas.
+            </Typography>
+            <br/>
+              <Grid container direction="column" alignContent="center" spacing={4}>
+                
+                <Grid item xs={6}>
+                  <ResponsiveContainer width="100%" height={144}>
+                    <PieChart margin={{ left: theme.spacing(2) }}>
+                      <Pie
+                        data={reasonData}
+                        innerRadius={40}
+                        outerRadius={70}
+                        dataKey="af"
+                      >
+                        {reasonData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={theme.palette[entry.color].main}
+                          />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </Grid>
+
+                <Grid item xs={6}>
+                  <div className={classes.pieChartLegendWrapper}>
+                    <table padding-right="10">
+                      <tr>
+                        <th></th>
+                        <th> Andel </th>
+                        <th> Trend </th>
+                        <th> Landssnitt </th>
+                      </tr>
+                      {reasonData.map(({ id, name, af, trend, sve, color }, index) => (
+                        <tr>
+                          <td>
+                            <div key={color} className={classes.legendItemContainer}>
+                              <Dot color={color} />
+                              <Typography style={{ whiteSpace: "nowrap" }}>
+                                &nbsp;{name}&nbsp;
+                              </Typography>
+                            </div>
+                          </td>
+                          <td>
+                            <Typography style={{ whiteSpace: "nowrap" }}>
+                              &nbsp;{af}%
+                            </Typography>
+                          </td>
+                          <td>
+                            <Typography style={{ whiteSpace: "nowrap" }}>
+                              &nbsp;{trend}
+                            </Typography>
+                          </td>
+                          <td>
+                            <Typography style={{ whiteSpace: "nowrap" }}>
+                              &nbsp;{sve}%
+                            </Typography>
+                          </td>
+                        </tr>
+                      ))}
+                      </table>
+                  </div>
+                </Grid>
+              </Grid>
+          </Widget>
+        </Grid>
+        
+
+        <Grid item xs={6} spacing={4}>
+          <Widget title="Andel som har köpt/leasat någon annan bil istället:" upperTitle disableWidgetMenu>
+            <Typography variant="h1" color="warning" className={classes.text} align="center"> 
+              39%
+            </Typography>
+            <br/>
+            <Typography variant="h5" color="textSecondary"> 
+              Vad köpte de istället?
+            </Typography>
+            <div align="center">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart width={200} height={300}>
+                  <Pie
+                    activeIndex={activeIndex}
+                    activeShape={renderActiveShape}
+                    data={alternativeData}
+                    cx={200}
+                    cy={150}
+                    innerRadius={60}
+                    outerRadius={100}
+                    fill={theme.palette.primary.main}
+                    dataKey="value"
+                    onMouseEnter={(e, id) => setActiveIndexId(id)}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </Widget>
         </Grid>
       </Grid>
@@ -412,41 +382,79 @@ export default function Dashboard(props) {
   );
 }
 
-// #######################################################################
-function getRandomData(length, min, max, multiplier = 10, maxDiff = 10) {
-  var array = new Array(length).fill();
-  let lastValue;
 
-  return array.map((item, index) => {
-    let randomValue = Math.floor(Math.random() * multiplier + 1);
+// ################################################################
 
-    while (
-      randomValue <= min ||
-      randomValue >= max ||
-      (lastValue && randomValue - lastValue > maxDiff)
-    ) {
-      randomValue = Math.floor(Math.random() * multiplier + 1);
-    }
+function renderActiveShape(props) {
+  var RADIAN = Math.PI / 180;
+  var {
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    startAngle,
+    endAngle,
+    fill,
+    payload,
+    percent,
+    value,
+  } = props;
+  var sin = Math.sin(-RADIAN * midAngle);
+  var cos = Math.cos(-RADIAN * midAngle);
+  var sx = cx + (outerRadius + 10) * cos;
+  var sy = cy + (outerRadius + 10) * sin;
+  var mx = cx + (outerRadius + 30) * cos;
+  var my = cy + (outerRadius + 30) * sin;
+  var ex = mx + (cos >= 0 ? 1 : -1) * 22;
+  var ey = my;
+  var textAnchor = cos >= 0 ? "start" : "end";
 
-    lastValue = randomValue;
-
-    return { value: randomValue };
-  });
+  return (
+    <g>
+      <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
+        {payload.name}
+      </text>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        innerRadius={outerRadius + 6}
+        outerRadius={outerRadius + 10}
+        fill={fill}
+      />
+      <path
+        d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
+        stroke={fill}
+        fill="none"
+      />
+      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+      <text
+        x={ex + (cos >= 0 ? 1 : -1) * 12}
+        y={ey}
+        textAnchor={textAnchor}
+        fill="#333"
+      >{`Antal ${value}`}</text>
+      <text
+        x={ex + (cos >= 0 ? 1 : -1) * 12}
+        y={ey}
+        dy={18}
+        textAnchor={textAnchor}
+        fill="#999"
+      >
+        {`(Andel ${(percent * 100).toFixed(2)}%)`}
+      </text>
+    </g>
+  );
 }
-
-function getMainChartData() {
-  var resultArray = [];
-  var tablet = getRandomData(31, 3500, 6500, 7500, 1000);
-  var desktop = getRandomData(31, 1500, 7500, 7500, 1500);
-  var mobile = getRandomData(31, 1500, 7500, 7500, 1500);
-
-  for (let i = 0; i < tablet.length; i++) {
-    resultArray.push({
-      tablet: tablet[i].value,
-      desktop: desktop[i].value,
-      mobile: mobile[i].value,
-    });
-  }
-
-  return resultArray;
-}
+                
