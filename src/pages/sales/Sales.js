@@ -71,7 +71,7 @@ export default function Rank() {
       <Grid container spacing={7}>
         <Grid item xs={12}>
           <MUIDataTable
-            title="Säljare"
+            title="Ranking av Säljare"
             data={datatableData}
             columns={columns}
             options={options}

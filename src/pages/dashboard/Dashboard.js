@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import {
   Grid,
+  Select,
+  OutlinedInput,
+  MenuItem,
+  LinearProgress,
 } from "@material-ui/core";
 import { useTheme } from "@material-ui/styles";
 import {
@@ -12,6 +16,9 @@ import {
   Line,
   PieChart,
   Pie,
+  BarChart,
+  Bar,
+  LabelList,
   Sector,
   Cell,
   YAxis,
@@ -27,6 +34,7 @@ import PageTitle from "../../components/PageTitle";
 import { Typography } from "../../components/Wrappers";
 import Dot from "../../components/Sidebar/components/Dot";
 import MUIDataTable from "mui-datatables";
+import PercentageChart from "./components/PercentageChart"
 
 // Mock-data
 const lineChartData = [
@@ -112,35 +120,75 @@ const surveyData = [
 const reasonData = [
   { 
     qid: 1, 
-    name: "Fann ingen produkt som tilltalade mig", 
+    name: "Säljaren hörde inte av sig", 
     af: 24, 
     trend: "+", 
     sve: 14, 
-    color: "warning" },
+    color: "secondary" },
   { 
     qid: 2, 
-    name: "Säljaren hörde inte av sig", 
+    name: "Fann ingen produkt som tilltalade mig", 
     af: 11, 
     trend: "-", 
     sve: 16, 
-    color: "secondary" },
+    color: "warning" },
   { 
     qid: 3, 
     name: "Jag sökte endast information", 
     af: 39, 
     trend: "+", 
     sve: 40, 
-    color: "primary" },
+    color: "success" },
   { 
     qid: 4, 
     name: "Fick bättre erbjudande från annat håll", 
     af: 27, 
     trend: "-", 
     sve: 30, 
-    color: "success" },
+    color: "primary" },
 ];
 
-const alternativeData = [
+const historicalReasonData = [
+  {
+    month: '2018.10', a: 40, b: 24, c: 19, d:23 
+  },
+  {
+    month: '2018.11', a: 30, b: 13, c: 22, d:12
+  },
+  {
+    month: '2018.12', a: 20, b: 98, c: 22, d:15
+  },
+  {
+    month: '2019.01', a: 27, b: 39, c: 20, d: 19
+  },
+  {
+    month: '2019.02', a: 31, b: 39, c: 20, d: 19
+  },
+  {
+    month: '2019.03', a: 36, b: 23, c: 35, d: 19
+  },
+  {
+    month: '2019.04', a: 23, b: 54, c: 20, d: 45
+  },
+  {
+    month: '2019.05', a: 17, b: 34, c: 65, d: 19
+  },
+  {
+    month: '2019.06', a: 40, b: 87, c: 20, d: 45
+  },
+  {
+    month: '2019.07', a: 36, b: 45, c: 56, d: 19
+  },
+  {
+    month: '2019.08', a: 24, b: 65, c: 20, d: 19
+  }
+];
+
+const currentStatusData = [
+  {q1: 31, q2: 15, q3: 15, q4:39}
+]
+
+const otherCarData = [
   {name:"Volkswagen", value:17},
   {name:"Volvo", value:13},
   {name:"Audi", value:9},
@@ -149,6 +197,8 @@ const alternativeData = [
   {name:"Skoda", value:0},
   {name:"Annat", value:39},
 ];
+
+// #################################################################
 
 // Chart settings
 const surveyColumns = [{
@@ -188,17 +238,21 @@ export default function Dashboard(props) {
   var classes = useStyles();
   var theme = useTheme();
   var [activeIndex, setActiveIndexId] = useState(0);
-
+  var [mainChartState, setMainChartState] = useState("aug");    // TODO: Set automatically to current month
+  var afnr = 40033
+  var fname = "Rolf Thomander"
 
   return (
     <>
-      <PageTitle title="Mia Pettersson - 44033" button="Senaste Rapporten" />
+      <PageTitle title="Rolf Thomander - 44033" />
       <Grid container spacing={4}>
       
         <Grid item xs={12}>
           <Widget title="Offertuppföljning" upperTitle disableWidgetMenu>
               <Typography> 
-                Andel som svarat ja till <i> "Efter besöket/erhållen offert, kontaktade säljaren dig för att följa upp?"</i>
+                Andel i % som svarat ja till <i> "Efter besöket/erhållen offert, kontaktade säljaren dig för att följa upp?"</i> <br/>
+                Värdena är dels kopplade till dig som säljare, dels aggregerat för alla säljare kopplat till återförsäljare {afnr}. <br/>
+                Data från de 12 senaste månaderna presenteras.
               </Typography>
             <ResponsiveContainer width="100%" height={350}>
               <LineChart
@@ -220,7 +274,7 @@ export default function Dashboard(props) {
                   type="monotone"
                   dataKey="ind"
                   name="Individuellt"
-                  stroke={theme.palette.warning.main}
+                  stroke={theme.palette.info.main}
                 />
                 <Line
                   type="monotone"
@@ -239,61 +293,77 @@ export default function Dashboard(props) {
           </Widget>
         </Grid>
 
-        <Grid item xs={12}>
-          <Widget title="Kundfeedback" upperTitle disableWidgetMenu>
-            <Typography> 
-              Valfri text som beskriver resultatet och hur det ska tolkas
-            </Typography>
-            <MUIDataTable
-              data={surveyData}
-              columns={surveyColumns}
-              options={tableOptions}
-            />
-          </Widget>
-        </Grid>
+        <Grid container direction="row" justify="center" alignItems="center">
+          <Typography variant="h5" color="textSecondary"> 
+            Period: 
+          </Typography>
 
-        <Grid item xs={6} >
-          <Widget title="Varför blev det inte en affär?" upperTitle disableWidgetMenu>
-            <Typography> 
-              Valfri text som beskriver resultatet och hur det ska tolkas.
-            </Typography>
-            <br/>
-              <Grid container direction="column" alignContent="center" spacing={4}>
+          <Select
+            value={mainChartState}
+            onChange={e => setMainChartState(e.target.value)}
+            input={
+              <OutlinedInput
+                labelWidth={0}
+                classes={{
+                  notchedOutline: classes.mainChartSelectRoot,
+                  input: classes.mainChartSelect,
+                }}
+              />
+            }
+            autoWidth
+          >
+            <MenuItem value="jan">Januari</MenuItem>
+            <MenuItem value="feb">Februari</MenuItem>
+            <MenuItem value="mar">Mars</MenuItem>
+            <MenuItem value="apr">April</MenuItem>
+            <MenuItem value="maj">Maj</MenuItem>
+            <MenuItem value="jun">Juni</MenuItem>
+            <MenuItem value="jul">Juli</MenuItem>
+            <MenuItem value="aug">Augusti</MenuItem>
+            <MenuItem value="sep">September</MenuItem>
+            <MenuItem value="okt">Oktober</MenuItem>
+            <MenuItem value="nov">Oktober</MenuItem>
+            <MenuItem value="dec">Oktober</MenuItem>
+          </Select>
+        </Grid>
+          <Grid item xs={12}>
+            <Widget title="Kundfeedback" upperTitle disableWidgetMenu>
+              <Typography> 
+                Värdena som presenteras här är från de kunder du gav en offert till under månad X, samt aggregerat för alla säljare kopplade till ÅF nummmer {afnr}.
+              </Typography>
+              <MUIDataTable
+                data={surveyData}
+                columns={surveyColumns}
+                options={tableOptions}
+              />
+            </Widget>
+          </Grid>
+
+          <Grid item xs={12} >
+            <Widget title="Varför blev det inte en affär?" upperTitle disableWidgetMenu>
+              <Typography> 
+                Värdena som presenteras här är aggregerat för alla kopplade till ÅF nummmer {afnr}
+              </Typography>
+              
+              <Grid container direction="row" alignContent="center" spacing={4}>
                 
-                <Grid item xs={6}>
-                  <ResponsiveContainer width="100%" height={144}>
-                    <PieChart margin={{ left: theme.spacing(2) }}>
-                      <Pie
-                        data={reasonData}
-                        innerRadius={40}
-                        outerRadius={70}
-                        dataKey="af"
-                      >
-                        {reasonData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={theme.palette[entry.color].main}
-                          />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
+                <Grid item xs={6} align="center">
+                  <PercentageChart data={historicalReasonData}/>
                 </Grid>
 
                 <Grid item xs={6}>
                   <div className={classes.pieChartLegendWrapper}>
-                    <table padding-right="10">
+                    <table padding="10">
                       <tr>
                         <th></th>
                         <th> Andel </th>
-                        <th> Trend </th>
                         <th> Landssnitt </th>
                       </tr>
-                      {reasonData.map(({ id, name, af, trend, sve, color }, index) => (
+                      {reasonData.map(({ id, name, af, sve, color }, index) => (
                         <tr>
                           <td>
                             <div key={color} className={classes.legendItemContainer}>
-                              <Dot color={color} />
+                              <Dot color={color} size="large" />
                               <Typography style={{ whiteSpace: "nowrap" }}>
                                 &nbsp;{name}&nbsp;
                               </Typography>
@@ -302,11 +372,6 @@ export default function Dashboard(props) {
                           <td>
                             <Typography style={{ whiteSpace: "nowrap" }}>
                               &nbsp;{af}%
-                            </Typography>
-                          </td>
-                          <td>
-                            <Typography style={{ whiteSpace: "nowrap" }}>
-                              &nbsp;{trend}
                             </Typography>
                           </td>
                           <td>
@@ -320,40 +385,91 @@ export default function Dashboard(props) {
                   </div>
                 </Grid>
               </Grid>
-          </Widget>
-        </Grid>
-        
 
-        <Grid item xs={6} spacing={4}>
-          <Widget title="Andel som har köpt/leasat någon annan bil istället:" upperTitle disableWidgetMenu>
-            <Typography variant="h1" color="warning" className={classes.text} align="center"> 
-              39%
-            </Typography>
-            <br/>
-            <Typography variant="h5" color="textSecondary"> 
-              Vad köpte de istället?
-            </Typography>
-            <div align="center">
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart width={200} height={300}>
-                  <Pie
-                    activeIndex={activeIndex}
-                    activeShape={renderActiveShape}
-                    data={alternativeData}
-                    cx={200}
-                    cy={150}
-                    innerRadius={60}
-                    outerRadius={100}
-                    fill={theme.palette.primary.main}
-                    dataKey="value"
-                    onMouseEnter={(e, id) => setActiveIndexId(id)}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </Widget>
+            </Widget>
+          </Grid>
+          
+
+          <Grid item xs={6} >
+            <Widget title="Kundens status" disableWidgetMenu>
+              <Typography variant="textSecondary" color="textSecondary" > 
+                Valfri text som beskriver innehållet och som sträcker sig över hela rutan. <br/> 
+                Värdena som presenteras här är aggregerat för alla kopplade till ÅF nummmer {afnr}
+              </Typography>
+                <Grid container spacing={4} direction="row" justify="space-evenly" alignItems="center">
+                  <Grid item>
+                    <BarChart
+                      width={120}
+                      height={200}
+                      data={currentStatusData}
+                    >
+                      <YAxis domain={[0, 100]} interval="preserveStartEnd" unit="%"/>
+                      <Bar dataKey="q4" stackId = "x" fill={theme.palette.primary.main} />
+                      <Bar dataKey="q3" stackId = "x" fill={theme.palette.success.main} />
+                      <Bar dataKey="q2" stackId = "x" fill={theme.palette.warning.main} />
+                      <Bar dataKey="q1" stackId = "x" fill={theme.palette.secondary.main} />
+                    </BarChart>
+                  </Grid>
+                  <Grid item>
+                    <div className={classes.legendItemContainer}>
+                      <Dot color="secondary" size="large" />
+                      <Typography style={{ whiteSpace: "nowrap" }}>
+                        {currentStatusData[0].q1}% Avser köpa bil inom de närmaste månaderna
+                      </Typography>
+                    </div>
+                    <br/>
+                    <div className={classes.legendItemContainer}>
+                      <Dot color="warning" size="large" />
+                      <Typography style={{ whiteSpace: "nowrap" }}>
+                        {currentStatusData[0].q2}% Inte dags ännu, samlar information
+                      </Typography>
+                    </div>
+                    <br/>
+                    <div className={classes.legendItemContainer}>
+                      <Dot color="success" size="large" />
+                      <Typography style={{ whiteSpace: "nowrap" }}>
+                        {currentStatusData[0].q3}% Ändrade förutsättningar, köp inte aktuellt
+                      </Typography>
+                    </div>
+                    <br/>
+                    <div className={classes.legendItemContainer}>
+                      <Dot color="primary" size="large" />
+                      <Typography style={{ whiteSpace: "nowrap" }}>
+                        {currentStatusData[0].q4}% Har köpt/leasat någon annan bil istället
+                      </Typography>
+                    </div>
+                  </Grid>
+                </Grid>
+            </Widget>
+          </Grid>
+
+
+          <Grid item xs={6}>
+            <Widget title="Konkurrenter" disableWidgetMenu>
+              <Typography variant="textSecondary" color="textSecondary" > 
+                Av de <b> {currentStatusData[0].q4}% </b> som köpt/least någon annan bil, vad köpte/leasar de?
+              </Typography>
+              <div align="center">
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart width={200} height={300}>
+                    <Pie
+                      activeIndex={activeIndex}
+                      activeShape={renderActiveShape}
+                      data={otherCarData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      fill={theme.palette.primary.main}
+                      dataKey="value"
+                      onMouseEnter={(e, id) => setActiveIndexId(id)}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </Widget>
+          </Grid>
         </Grid>
-      </Grid>
     </>
   );
 }
