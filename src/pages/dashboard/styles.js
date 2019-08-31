@@ -22,7 +22,7 @@ export default makeStyles(theme => ({
     marginBottom: theme.spacing(1),
     backgroundColor: theme.palette.primary.main,
   },
-  pieChartLegendWrapper: {
+  percentageChartLegendWrapper: {
     height: "100%",
     display: "flex",
     flexDirection: "column",

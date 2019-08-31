@@ -20,7 +20,7 @@ import logo from "./logo.svg";
 import google from "../../images/google.svg";
 
 // context
-import { useUserDispatch, loginUser } from "../../context/UserContext";
+import { useUserDispatch, loginUser, resetPassword } from "../../context/UserContext";
 
 function Login(props) {
   var classes = useStyles();
@@ -30,11 +30,14 @@ function Login(props) {
 
   // local
   var [isLoading, setIsLoading] = useState(false);
-  var [error, setError] = useState(null);
+  var [forgotten, setForgotten] = useState(false);
+  var [error, setError] = useState(false);
   var [activeTabId, setActiveTabId] = useState(0);
   var [nameValue, setNameValue] = useState("");
   var [loginValue, setLoginValue] = useState("");
   var [passwordValue, setPasswordValue] = useState("");
+  var [passwordCheckValue, setPasswordCheckValue] = useState("");
+
 
   return (
     <Grid container className={classes.container}>
@@ -51,17 +54,20 @@ function Login(props) {
             textColor="primary"
             centered
           >
-            <Tab label="Login" classes={{ root: classes.tab }} />
-            <Tab label="New User" classes={{ root: classes.tab }} />
+            <Tab label="Logga in" classes={{ root: classes.tab }} />
+            <Tab label="Ny användare" classes={{ root: classes.tab }} />
           </Tabs>
-          {activeTabId === 0 && (
+          {activeTabId === 0 && !forgotten && (
             <React.Fragment>
               <Typography variant="h1" className={classes.greeting}>
-                Welcome!
+                Välkommen!
+              </Typography>
+              <Typography variant="h2" className={classes.subGreeting}>
+                Logga in nedan
               </Typography>
               <Fade in={error}>
                 <Typography color="secondary" className={classes.errorMessage}>
-                  Something is wrong with your login or password :(
+                  Något är fel med ditt användarnamn eller lösenord, försök igen!
                 </Typography>
               </Fade>
               <TextField
@@ -75,7 +81,7 @@ function Login(props) {
                 value={loginValue}
                 onChange={e => setLoginValue(e.target.value)}
                 margin="normal"
-                placeholder="Email Adress"
+                placeholder="E-postadress"
                 type="email"
                 fullWidth
               />
@@ -90,7 +96,7 @@ function Login(props) {
                 value={passwordValue}
                 onChange={e => setPasswordValue(e.target.value)}
                 margin="normal"
-                placeholder="Password"
+                placeholder="Lösenord"
                 type="password"
                 fullWidth
               />
@@ -116,30 +122,88 @@ function Login(props) {
                     color="primary"
                     size="large"
                   >
-                    Login
+                    Logga in
                   </Button>
                 )}
                 <Button
                   color="primary"
                   size="large"
                   className={classes.forgetButton}
+                  onClick={() => setForgotten(true)}
                 >
-                  Forget Password
+                  Glömt lösenord?
+                </Button>
+              </div>
+            </React.Fragment>
+          )}
+          {activeTabId === 0 && forgotten && (
+            <React.Fragment>
+              <Typography variant="h2" className={classes.greeting}>
+                Glömt ditt lösenord?
+              </Typography>
+              <Fade in={error}>
+              <Typography color="secondary" className={classes.errorMessage}>
+                  Angiven e-postadress finns inte registrerad.
+                </Typography>
+              </Fade>
+              <TextField
+                id="email"
+                InputProps={{
+                  classes: {
+                    underline: classes.textFieldUnderline,
+                    input: classes.textField,
+                  },
+                }}
+                value={loginValue}
+                onChange={e => setLoginValue(e.target.value)}
+                margin="normal"
+                placeholder="Ange din e-postadress"
+                type="email"
+                fullWidth
+              />
+              <div className={classes.formButtons}>
+                {isLoading ? (
+                  <CircularProgress size={26} className={classes.loginLoader} />
+                ) : (
+                  <Button
+                    disabled={
+                      loginValue.length === 0
+                    }
+                    onClick={() =>
+                      resetPassword(
+                        userDispatch,
+                        loginValue,
+                        props.history,
+                        setIsLoading,
+                        setError,
+                      )
+                    }
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                  >
+                    Skicka
+                  </Button>
+                )}
+                <Button
+                  color="primary"
+                  size="large"
+                  className={classes.forgetButton}
+                  onClick={() => setForgotten(false)}
+                >
+                  Tillbaka
                 </Button>
               </div>
             </React.Fragment>
           )}
           {activeTabId === 1 && (
             <React.Fragment>
-              <Typography variant="h1" className={classes.greeting}>
-                Welcome!
-              </Typography>
               <Typography variant="h2" className={classes.subGreeting}>
-                Create your account
+                Skapa ett konto
               </Typography>
               <Fade in={error}>
                 <Typography color="secondary" className={classes.errorMessage}>
-                  Something is wrong with your login or password :(
+                  Något gick fel vid registreringen. Försök igen!
                 </Typography>
               </Fade>
               <TextField
@@ -153,7 +217,7 @@ function Login(props) {
                 value={nameValue}
                 onChange={e => setNameValue(e.target.value)}
                 margin="normal"
-                placeholder="Full Name"
+                placeholder="Namn"
                 type="email"
                 fullWidth
               />
@@ -168,7 +232,7 @@ function Login(props) {
                 value={loginValue}
                 onChange={e => setLoginValue(e.target.value)}
                 margin="normal"
-                placeholder="Email Adress"
+                placeholder="E-postadress"
                 type="email"
                 fullWidth
               />
@@ -183,7 +247,22 @@ function Login(props) {
                 value={passwordValue}
                 onChange={e => setPasswordValue(e.target.value)}
                 margin="normal"
-                placeholder="Password"
+                placeholder="Lösenord"
+                type="password"
+                fullWidth
+              />
+              <TextField
+                id="passwordCheck"
+                InputProps={{
+                  classes: {
+                    underline: classes.textFieldUnderline,
+                    input: classes.textField,
+                  },
+                }}
+                value={passwordCheckValue}
+                onChange={e => setPasswordCheckValue(e.target.value)}
+                margin="normal"
+                placeholder="Upprepa lösenord"
                 type="password"
                 fullWidth
               />
@@ -205,7 +284,9 @@ function Login(props) {
                     disabled={
                       loginValue.length === 0 ||
                       passwordValue.length === 0 ||
-                      nameValue.length === 0
+                      nameValue.length === 0 ||
+                      passwordCheckValue === 0 ||
+                      passwordCheckValue !== passwordValue
                     }
                     size="large"
                     variant="contained"
@@ -217,26 +298,11 @@ function Login(props) {
                   </Button>
                 )}
               </div>
-              <div className={classes.formDividerContainer}>
-                <div className={classes.formDivider} />
-                <Typography className={classes.formDividerWord}>or</Typography>
-                <div className={classes.formDivider} />
-              </div>
-              <Button
-                size="large"
-                className={classnames(
-                  classes.googleButton,
-                  classes.googleButtonCreating,
-                )}
-              >
-                <img src={google} alt="google" className={classes.googleIcon} />
-                &nbsp;Sign in with Google
-              </Button>
             </React.Fragment>
           )}
         </div>
         <Typography color="primary" className={classes.copyright}>
-          © 2019 ONON AB. All rights reserved.
+          2019 ONON AB.
         </Typography>
       </div>
     </Grid>

@@ -1,7 +1,11 @@
 import React from "react";
+import axios from "axios";
 
 var UserStateContext = React.createContext();
 var UserDispatchContext = React.createContext();
+//export const apiUrl = "http://localhost:5000";
+export const apiUrl = "https://onon-api.herokuapp.com";
+
 
 function userReducer(state, action) {
   switch (action.type) {
@@ -45,28 +49,44 @@ function useUserDispatch() {
   return context;
 }
 
-export { UserProvider, useUserState, useUserDispatch, loginUser, signOut };
+export { UserProvider, useUserState, useUserDispatch, loginUser, resetPassword, signOut };
 
 // ###########################################################
 
 function loginUser(dispatch, login, password, history, setIsLoading, setError) {
-  setError(false);
   setIsLoading(true);
 
-  if (!!login && !!password) {
-    setTimeout(() => {
-      localStorage.setItem("id_token", "1");
-      dispatch({ type: "LOGIN_SUCCESS" });
-      setError(null);
-      setIsLoading(false);
+  // Payload
+  const url = apiUrl + "/api/login";
 
-      history.push("/app/dashboard");
-    }, 2000);
-  } else {
-    dispatch({ type: "LOGIN_FAILURE" });
-    setError(true);
-    setIsLoading(false);
+  // Contact api and handle response
+  try {
+    const response = axios.post(url, {login: login, password: password})
+    .then(res => {
+      console.log(res);
+      if (res.status === 200) {
+        console.log("If clause passed")
+        localStorage.setItem("id_token", "1");
+        dispatch({ type: "LOGIN_SUCCESS" });
+        setError(null);
+        setIsLoading(false);
+        history.push("/app/dashboard");
+      } else {
+        setError(true);
+        setIsLoading(false);
+      }
+    });
+  } catch (e) {
+    console.log(e);
   }
+}
+
+// TODO - Check if email is stored in database
+// If stored in db, send reset link
+// else error
+function resetPassword (dispatch, login, history, setIsLoading, setError) {
+  console.log(login);
+  setError(true);
 }
 
 function signOut(dispatch, history) {

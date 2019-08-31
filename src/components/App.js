@@ -15,6 +15,9 @@ export default function App() {
   // global
   var { isAuthenticated } = useUserState();
 
+  // TODO: Handle user authentification
+//  const [user, setUser] = useState({fname: "", lname:"", afnr:""})
+
   return (
     <HashRouter>
       <Switch>

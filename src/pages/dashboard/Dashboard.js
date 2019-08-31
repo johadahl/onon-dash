@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Grid,
   Select,
   OutlinedInput,
   MenuItem,
-  LinearProgress,
 } from "@material-ui/core";
 import { useTheme } from "@material-ui/styles";
 import {
@@ -18,9 +17,7 @@ import {
   Pie,
   BarChart,
   Bar,
-  LabelList,
   Sector,
-  Cell,
   YAxis,
   XAxis,
 } from "recharts";
@@ -149,39 +146,17 @@ const reasonData = [
 ];
 
 const historicalReasonData = [
-  {
-    month: '2018.10', a: 40, b: 24, c: 19, d:23 
-  },
-  {
-    month: '2018.11', a: 30, b: 13, c: 22, d:12
-  },
-  {
-    month: '2018.12', a: 20, b: 98, c: 22, d:15
-  },
-  {
-    month: '2019.01', a: 27, b: 39, c: 20, d: 19
-  },
-  {
-    month: '2019.02', a: 31, b: 39, c: 20, d: 19
-  },
-  {
-    month: '2019.03', a: 36, b: 23, c: 35, d: 19
-  },
-  {
-    month: '2019.04', a: 23, b: 54, c: 20, d: 45
-  },
-  {
-    month: '2019.05', a: 17, b: 34, c: 65, d: 19
-  },
-  {
-    month: '2019.06', a: 40, b: 87, c: 20, d: 45
-  },
-  {
-    month: '2019.07', a: 36, b: 45, c: 56, d: 19
-  },
-  {
-    month: '2019.08', a: 24, b: 65, c: 20, d: 19
-  }
+  {month: '2018.10', a: 40, b: 24, c: 19, d: 23},
+  {month: '2018.11', a: 30, b: 13, c: 22, d: 12},
+  {month: '2018.12', a: 20, b: 98, c: 22, d: 15},
+  {month: '2019.01', a: 27, b: 39, c: 20, d: 19},
+  {month: '2019.02', a: 31, b: 39, c: 20, d: 19},
+  {month: '2019.03', a: 36, b: 23, c: 35, d: 19},
+  {month: '2019.04', a: 23, b: 54, c: 20, d: 45},
+  {month: '2019.05', a: 17, b: 34, c: 65, d: 19},
+  {month: '2019.06', a: 40, b: 87, c: 20, d: 45},
+  {month: '2019.07', a: 36, b: 45, c: 56, d: 19},
+  {month: '2019.08', a: 24, b: 65, c: 20, d: 19}
 ];
 
 const currentStatusData = [
@@ -200,7 +175,7 @@ const otherCarData = [
 
 // #################################################################
 
-// Chart settings
+// Table settings
 const surveyColumns = [{
   name: "question",
   label: "Fråga"},
@@ -238,20 +213,26 @@ export default function Dashboard(props) {
   var classes = useStyles();
   var theme = useTheme();
   var [activeIndex, setActiveIndexId] = useState(0);
-  var [mainChartState, setMainChartState] = useState("aug");    // TODO: Set automatically to current month
-  var afnr = 40033
-  var fname = "Rolf Thomander"
+  var [currentMonth, setCurrentMonth] = useState("aug");    // TODO: Set automatically to current month
+  var [hasErrors, setHasErrors] = useState(false);
+
+  useEffect(() => {
+//    fetch('http://localhost:5000/api/get_user')
+//    .then(res => res.json())
+//    .then(res => console.log(res))
+//    .catch(err => {})
+  }, []);
 
   return (
     <>
-      <PageTitle title="Rolf Thomander - 44033" />
+      <PageTitle title={props.user.fname + " " + props.user.lname + " - " + props.user.afnr}  />
       <Grid container spacing={4}>
       
         <Grid item xs={12}>
           <Widget title="Offertuppföljning" upperTitle disableWidgetMenu>
               <Typography> 
                 Andel i % som svarat ja till <i> "Efter besöket/erhållen offert, kontaktade säljaren dig för att följa upp?"</i> <br/>
-                Värdena är dels kopplade till dig som säljare, dels aggregerat för alla säljare kopplat till återförsäljare {afnr}. <br/>
+                Värdena är dels kopplade till dig som säljare, dels aggregerat för alla säljare kopplat till återförsäljare {props.user.afnr}. <br/>
                 Data från de 12 senaste månaderna presenteras.
               </Typography>
             <ResponsiveContainer width="100%" height={350}>
@@ -267,7 +248,7 @@ export default function Dashboard(props) {
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
-                <YAxis domain={[0, 100]}/>
+                <YAxis domain={[0, 100]} unit="%"/>
                 <Tooltip />
                 <Legend />
                 <Line
@@ -299,8 +280,8 @@ export default function Dashboard(props) {
           </Typography>
 
           <Select
-            value={mainChartState}
-            onChange={e => setMainChartState(e.target.value)}
+            value={currentMonth}
+            onChange={e => setCurrentMonth(e.target.value)}
             input={
               <OutlinedInput
                 labelWidth={0}
@@ -329,7 +310,7 @@ export default function Dashboard(props) {
           <Grid item xs={12}>
             <Widget title="Kundfeedback" upperTitle disableWidgetMenu>
               <Typography> 
-                Värdena som presenteras här är från de kunder du gav en offert till under månad X, samt aggregerat för alla säljare kopplade till ÅF nummmer {afnr}.
+                Värdena som presenteras här är från de kunder du gav en offert till under månad X, samt aggregerat för alla säljare kopplade till ÅF nummmer {props.user.afnr}.
               </Typography>
               <MUIDataTable
                 data={surveyData}
@@ -342,17 +323,17 @@ export default function Dashboard(props) {
           <Grid item xs={12} >
             <Widget title="Varför blev det inte en affär?" upperTitle disableWidgetMenu>
               <Typography> 
-                Värdena som presenteras här är aggregerat för alla kopplade till ÅF nummmer {afnr}
+                Värdena som presenteras här är aggregerat för alla kopplade till ÅF nummmer {props.user.afnr}
               </Typography>
               
-              <Grid container direction="row" alignContent="center" spacing={4}>
+              <Grid container direction="row" alignContent="flex-start" spacing={4}>
                 
                 <Grid item xs={6} align="center">
                   <PercentageChart data={historicalReasonData}/>
                 </Grid>
 
-                <Grid item xs={6}>
-                  <div className={classes.pieChartLegendWrapper}>
+                <Grid item xs={6} align="center" zeroMinWidth>
+                  <div className={classes.percentageChartLegendWrapper}>
                     <table padding="10">
                       <tr>
                         <th></th>
@@ -364,18 +345,18 @@ export default function Dashboard(props) {
                           <td>
                             <div key={color} className={classes.legendItemContainer}>
                               <Dot color={color} size="large" />
-                              <Typography style={{ whiteSpace: "nowrap" }}>
+                              <Typography noWrap>
                                 &nbsp;{name}&nbsp;
                               </Typography>
                             </div>
                           </td>
                           <td>
-                            <Typography style={{ whiteSpace: "nowrap" }}>
+                            <Typography noWrap>
                               &nbsp;{af}%
                             </Typography>
                           </td>
                           <td>
-                            <Typography style={{ whiteSpace: "nowrap" }}>
+                            <Typography noWrap>
                               &nbsp;{sve}%
                             </Typography>
                           </td>
@@ -390,56 +371,56 @@ export default function Dashboard(props) {
           </Grid>
           
 
-          <Grid item xs={6} >
+          <Grid item xs={6} margin={4}>
             <Widget title="Kundens status" disableWidgetMenu>
               <Typography variant="textSecondary" color="textSecondary" > 
                 Valfri text som beskriver innehållet och som sträcker sig över hela rutan. <br/> 
-                Värdena som presenteras här är aggregerat för alla kopplade till ÅF nummmer {afnr}
+                Värdena som presenteras här är aggregerat för alla kopplade till ÅF nummmer {props.user.afnr}
               </Typography>
-                <Grid container spacing={4} direction="row" justify="space-evenly" alignItems="center">
-                  <Grid item>
-                    <BarChart
-                      width={120}
-                      height={200}
-                      data={currentStatusData}
-                    >
-                      <YAxis domain={[0, 100]} interval="preserveStartEnd" unit="%"/>
-                      <Bar dataKey="q4" stackId = "x" fill={theme.palette.primary.main} />
-                      <Bar dataKey="q3" stackId = "x" fill={theme.palette.success.main} />
-                      <Bar dataKey="q2" stackId = "x" fill={theme.palette.warning.main} />
-                      <Bar dataKey="q1" stackId = "x" fill={theme.palette.secondary.main} />
-                    </BarChart>
-                  </Grid>
-                  <Grid item>
-                    <div className={classes.legendItemContainer}>
-                      <Dot color="secondary" size="large" />
-                      <Typography style={{ whiteSpace: "nowrap" }}>
-                        {currentStatusData[0].q1}% Avser köpa bil inom de närmaste månaderna
-                      </Typography>
-                    </div>
-                    <br/>
-                    <div className={classes.legendItemContainer}>
-                      <Dot color="warning" size="large" />
-                      <Typography style={{ whiteSpace: "nowrap" }}>
-                        {currentStatusData[0].q2}% Inte dags ännu, samlar information
-                      </Typography>
-                    </div>
-                    <br/>
-                    <div className={classes.legendItemContainer}>
-                      <Dot color="success" size="large" />
-                      <Typography style={{ whiteSpace: "nowrap" }}>
-                        {currentStatusData[0].q3}% Ändrade förutsättningar, köp inte aktuellt
-                      </Typography>
-                    </div>
-                    <br/>
-                    <div className={classes.legendItemContainer}>
-                      <Dot color="primary" size="large" />
-                      <Typography style={{ whiteSpace: "nowrap" }}>
-                        {currentStatusData[0].q4}% Har köpt/leasat någon annan bil istället
-                      </Typography>
-                    </div>
-                  </Grid>
+              <Grid container direction="row" justify="space-evenly" alignItems="center">
+                <Grid item>
+                  <BarChart
+                    width={120}
+                    height={250}
+                    data={currentStatusData}
+                  >
+                    <YAxis domain={[0, 100]} interval="preserveStartEnd" unit="%"/>
+                    <Bar dataKey="q4" stackId = "x" fill={theme.palette.primary.main} />
+                    <Bar dataKey="q3" stackId = "x" fill={theme.palette.success.main} />
+                    <Bar dataKey="q2" stackId = "x" fill={theme.palette.warning.main} />
+                    <Bar dataKey="q1" stackId = "x" fill={theme.palette.secondary.main} />
+                  </BarChart>
                 </Grid>
+                <Grid item zeroMinWidth>
+                  <div className={classes.legendItemContainer}>
+                    <Dot color="secondary" size="large" />
+                    <Typography noWrap>
+                      {currentStatusData[0].q1}% Avser köpa bil inom de närmaste månaderna
+                    </Typography>
+                  </div>
+                  <br/>
+                  <div className={classes.legendItemContainer}>
+                    <Dot color="warning" size="large" />
+                    <Typography noWrap>
+                      {currentStatusData[0].q2}% Inte dags ännu, samlar information
+                    </Typography>
+                  </div>
+                  <br/>
+                  <div className={classes.legendItemContainer}>
+                    <Dot color="success" size="large" />
+                    <Typography noWrap>
+                      {currentStatusData[0].q3}% Ändrade förutsättningar, köp inte aktuellt
+                    </Typography>
+                  </div>
+                  <br/>
+                  <div className={classes.legendItemContainer}>
+                    <Dot color="primary" size="large" />
+                    <Typography noWrap>
+                      {currentStatusData[0].q4}% Har köpt/leasat någon annan bil istället
+                    </Typography>
+                  </div>
+                </Grid>
+              </Grid>
             </Widget>
           </Grid>
 
