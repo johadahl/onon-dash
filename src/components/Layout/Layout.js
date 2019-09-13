@@ -20,6 +20,7 @@ import Sidebar from "../Sidebar";
 import Dashboard from "../../pages/dashboard";
 import Af from "../../pages/af";
 import Sales from "../../pages/sales";
+import Settings from "../../pages/settings";
 
 // context
 import { useLayoutState } from "../../context/LayoutContext";
@@ -50,7 +51,7 @@ function Layout(props) {
   return (
     <div className={classes.root}>
         <>
-          <Header history={props.history} />
+          <Header history={props.history} user={user}/>
           <Sidebar />
           <div
             className={classnames(classes.content, {
@@ -62,6 +63,7 @@ function Layout(props) {
               <Route path="/app/dashboard" render={(props) => <Dashboard {...props} user={user} />}/>
               <Route path="/app/af" component={Af} />
               <Route path="/app/sales" component={Sales} />
+              <Route path="/app/settings" render={(props) => <Settings {...props} user={user} />}/>
             </Switch>
           </div>
         </>

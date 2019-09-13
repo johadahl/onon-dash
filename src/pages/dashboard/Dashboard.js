@@ -214,7 +214,6 @@ export default function Dashboard(props) {
   var theme = useTheme();
   var [activeIndex, setActiveIndexId] = useState(0);
   var [currentMonth, setCurrentMonth] = useState("aug");    // TODO: Set automatically to current month
-  var [hasErrors, setHasErrors] = useState(false);
 
   useEffect(() => {
 //    fetch('http://localhost:5000/api/get_user')
@@ -225,7 +224,7 @@ export default function Dashboard(props) {
 
   return (
     <>
-      <PageTitle title={props.user.fname + " " + props.user.lname + " - " + props.user.afnr}  />
+      <PageTitle title="Översikt" />
       <Grid container spacing={4}>
       
         <Grid item xs={12}>

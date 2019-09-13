@@ -3,13 +3,16 @@ import axios from "axios";
 
 var UserStateContext = React.createContext();
 var UserDispatchContext = React.createContext();
-//export const apiUrl = "http://localhost:5000";
 export const apiUrl = "https://onon-api.herokuapp.com";
+//export const apiUrl = "http://localhost:5000";
+
+export { UserProvider, useUserState, useUserDispatch, loginUser, resetPassword, changePassword, changeEmail, inviteFriend, signOut };
 
 
 function userReducer(state, action) {
   switch (action.type) {
     case "LOGIN_SUCCESS":
+      console.log("Login success, do something here")
       return { ...state, isAuthenticated: true };
     case "SIGN_OUT_SUCCESS":
       return { ...state, isAuthenticated: false };
@@ -49,11 +52,10 @@ function useUserDispatch() {
   return context;
 }
 
-export { UserProvider, useUserState, useUserDispatch, loginUser, resetPassword, signOut };
-
 // ###########################################################
 
 function loginUser(dispatch, login, password, history, setIsLoading, setError) {
+  setError(false);
   setIsLoading(true);
 
   // Payload
@@ -61,13 +63,13 @@ function loginUser(dispatch, login, password, history, setIsLoading, setError) {
 
   // Contact api and handle response
   try {
-    const response = axios.post(url, {login: login, password: password})
+    axios.post(url, {login: login, password: password})
     .then(res => {
       console.log(res);
       if (res.status === 200) {
         console.log("If clause passed")
         localStorage.setItem("id_token", "1");
-        dispatch({ type: "LOGIN_SUCCESS" });
+        dispatch({ type: "LOGIN_SUCCESS" });      // Set user data
         setError(null);
         setIsLoading(false);
         history.push("/app/dashboard");
@@ -82,11 +84,28 @@ function loginUser(dispatch, login, password, history, setIsLoading, setError) {
 }
 
 // TODO - Check if email is stored in database
-// If stored in db, send reset link
-// else error
-function resetPassword (dispatch, login, history, setIsLoading, setError) {
+// If stored in db, send reset link else error
+function resetPassword (dispatch, login, history, setNotification, setNotificationMessage) {
   console.log(login);
-  setError(true);
+  setNotification(true);
+}
+
+function changePassword (dispatch, password, history, setNotification, setNotificationMessage) {
+  console.log("Change Password");
+  setNotificationMessage("Lösenord uppdaterat");
+  setNotification(true);
+}
+
+function changeEmail (dispatch, login, history, setNotification, setNotificationMessage) {
+  console.log("Change Email");
+  setNotificationMessage("E-postadress ändrad");
+  setNotification(true);
+}
+
+function inviteFriend (dispatch, login, history, setNotification, setNotificationMessage) {
+  console.log("Change Email");
+  setNotificationMessage("Inbjudan skickad");
+  setNotification(true);
 }
 
 function signOut(dispatch, history) {

@@ -1,24 +1,24 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   AppBar,
   Toolbar,
   IconButton,
-  Menu,
-  MenuItem,
+  Tooltip,
 } from "@material-ui/core";
+
 import {
   Menu as MenuIcon,
-  Person as AccountIcon,
   Lock as LogOutIcon,
   ArrowBack as ArrowBackIcon,
 } from "@material-ui/icons";
+
 import classNames from "classnames";
 
 // styles
 import useStyles from "./styles";
 
 // components
-import { Badge, Typography } from "../Wrappers/Wrappers";
+import { Typography } from "../Wrappers/Wrappers";
 
 // context
 import {
@@ -28,7 +28,6 @@ import {
 } from "../../context/LayoutContext";
 import { useUserDispatch, signOut } from "../../context/UserContext";
 
-
 export default function Header(props) {
   var classes = useStyles();
 
@@ -37,85 +36,57 @@ export default function Header(props) {
   var layoutDispatch = useLayoutDispatch();
   var userDispatch = useUserDispatch();
 
-  // local
-  var [profileMenu, setProfileMenu] = useState(null);
-
   return (
     <AppBar position="fixed" className={classes.appBar}>
       <Toolbar className={classes.toolbar}>
-        <IconButton
-          color="inherit"
-          onClick={() => toggleSidebar(layoutDispatch)}
-          className={classNames(
-            classes.headerMenuButton,
-            classes.headerMenuButtonCollapse,
-          )}
-        >
-          {layoutState.isSidebarOpened ? (
-            <ArrowBackIcon
-              classes={{
-                root: classNames(
-                  classes.headerIcon,
-                  classes.headerIconCollapse,
-                ),
-              }}
-            />
-          ) : (
-            <MenuIcon
-              classes={{
-                root: classNames(
-                  classes.headerIcon,
-                  classes.headerIconCollapse,
-                ),
-              }}
-            />
-          )}
-        </IconButton>
+        <Tooltip title="Huvudmeny">
+          <IconButton
+            color="inherit"
+            onClick={() => toggleSidebar(layoutDispatch)}
+            className={classNames(
+              classes.headerMenuButton,
+              classes.headerMenuButtonCollapse,
+            )}
+          >
+            {layoutState.isSidebarOpened ? (
+              <ArrowBackIcon
+                classes={{
+                  root: classNames(
+                    classes.headerIcon,
+                    classes.headerIconCollapse,
+                  ),
+                }}
+              />
+            ) : (
+              <MenuIcon
+                classes={{
+                  root: classNames(
+                    classes.headerIcon,
+                    classes.headerIconCollapse,
+                  ),
+                }}
+              />
+            )}
+          </IconButton>
+        </Tooltip>
         <Typography variant="h6" weight="medium" className={classes.logotype}>
           Volkswagen Group Sweden - Lost Sales Analytics
         </Typography>
         <div className={classes.grow} />
-        <IconButton
-          aria-haspopup="true"
-          color="inherit"
-          className={classes.headerMenuButton}
-          aria-controls="profile-menu"
-          onClick={e => setProfileMenu(e.currentTarget)}
-        >
-          <AccountIcon classes={{ root: classes.headerIcon }} />
-        </IconButton>
-        <Menu
-          id="profile-menu"
-          open={Boolean(profileMenu)}
-          anchorEl={profileMenu}
-          onClose={() => setProfileMenu(null)}
-          className={classes.headerMenu}
-          classes={{ paper: classes.profileMenu }}
-          disableAutoFocusItem
-        >
-          <div className={classes.profileMenuUser}>
-            <Typography variant="h4" weight="medium">
-              Rolf Thomander
-            </Typography>
-          </div>
-          <MenuItem
-            className={classNames(
-              classes.profileMenuItem,
-              classes.headerMenuItem,
-            )}
-          >
-            <AccountIcon className={classes.profileMenuIcon} /> Inställningar
-          </MenuItem>
-          <MenuItem
-            className={classNames(
-              classes.profileMenuItem,
-              classes.headerMenuItem,
-            )}
+        <Typography variant="h6" weight="medium" className={classes.logotype}>
+          {props.user.fname} {props.user.lname} - {props.user.afnr}
+        </Typography>
+        <Tooltip title="Logga ut">
+          <IconButton
+            aria-haspopup="true"
+            color="inherit"
+            className={classes.headerMenuButton}
+            aria-controls="profile-menu"
             onClick={() => signOut(userDispatch, props.history)}
           >
-            <LogOutIcon className={classes.profileMenuIcon} /> Logga ut
-          </MenuItem>
-        </Menu>
+            <LogOutIcon classes={{ root: classes.headerIcon }} />
+          </IconButton>
+        </Tooltip>
       </Toolbar>
     </AppBar>
   );

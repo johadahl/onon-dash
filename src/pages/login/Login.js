@@ -10,14 +10,12 @@ import {
   Fade,
 } from "@material-ui/core";
 import { withRouter } from "react-router-dom";
-import classnames from "classnames";
 
 // styles
 import useStyles from "./styles";
 
 // logo
 import logo from "./logo.svg";
-import google from "../../images/google.svg";
 
 // context
 import { useUserDispatch, loginUser, resetPassword } from "../../context/UserContext";
@@ -33,7 +31,6 @@ function Login(props) {
   var [forgotten, setForgotten] = useState(false);
   var [error, setError] = useState(false);
   var [activeTabId, setActiveTabId] = useState(0);
-  var [nameValue, setNameValue] = useState("");
   var [loginValue, setLoginValue] = useState("");
   var [passwordValue, setPasswordValue] = useState("");
   var [passwordCheckValue, setPasswordCheckValue] = useState("");
@@ -203,24 +200,11 @@ function Login(props) {
               </Typography>
               <Fade in={error}>
                 <Typography color="secondary" className={classes.errorMessage}>
-                  Något gick fel vid registreringen. Försök igen!
+                  Något gick fel vid registreringen.
+                  <br/>
+                  Ange den e-postadress som är kopplad mot tjänst X sedan tidigare.
                 </Typography>
               </Fade>
-              <TextField
-                id="name"
-                InputProps={{
-                  classes: {
-                    underline: classes.textFieldUnderline,
-                    input: classes.textField,
-                  },
-                }}
-                value={nameValue}
-                onChange={e => setNameValue(e.target.value)}
-                margin="normal"
-                placeholder="Namn"
-                type="email"
-                fullWidth
-              />
               <TextField
                 id="email"
                 InputProps={{
@@ -284,7 +268,6 @@ function Login(props) {
                     disabled={
                       loginValue.length === 0 ||
                       passwordValue.length === 0 ||
-                      nameValue.length === 0 ||
                       passwordCheckValue === 0 ||
                       passwordCheckValue !== passwordValue
                     }
@@ -294,7 +277,7 @@ function Login(props) {
                     fullWidth
                     className={classes.createAccountButton}
                   >
-                    Create your account
+                    Skapa ditt konto
                   </Button>
                 )}
               </div>

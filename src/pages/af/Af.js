@@ -66,7 +66,7 @@ export default function Rank() {
   return (
     <>
       <PageTitle title="Offertuppföljning" />
-      <Grid container spacing={7}>
+      <Grid container spacing={4}>
         <Grid item xs={12}>
           <MUIDataTable
             title="Ranking av Återförsäljare"

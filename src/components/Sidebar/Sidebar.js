@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Drawer, IconButton, List } from "@material-ui/core";
 import {
   Home as HomeIcon,
-  FormatListNumbered as RankIcon,
   QuestionAnswer as SupportIcon,
   LibraryBooks as LibraryIcon,
   HelpOutline as FAQIcon,
   ArrowBack as ArrowBackIcon,
+  Settings as SettingsIcon,
+  Business as BusinessIcon,
+  People as PeopleIcon,
 } from "@material-ui/icons";
+
 import { useTheme } from "@material-ui/styles";
 import { withRouter } from "react-router-dom";
 import classNames from "classnames";
@@ -25,19 +28,24 @@ import {
   toggleSidebar,
 } from "../../context/LayoutContext";
 
+
 const structure = [
   { id: 0, 
-    label: "Dashboard", 
+    label: "Översikt", 
     link: "/app/dashboard", 
     icon: <HomeIcon /> },
   { id: 1, 
     label: "Återförsäljare",
     link: "/app/af",
-    icon: <RankIcon />},
+    icon: <BusinessIcon />},
   { id: 2, 
     label: "Säljare",
     link: "/app/sales",
-    icon: <RankIcon />},
+    icon: <PeopleIcon />},
+  { id: 3, 
+    label: "Inställningar",
+    link: "/app/settings",
+    icon: <SettingsIcon />},
   { id: 100, type: "divider" },
   { id: 101, type: "title", label: "Ej använt" },
 //  { id: 3, label: "Typography", link: "/app/typography", icon: <TypographyIcon /> },
