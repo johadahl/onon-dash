@@ -6,16 +6,26 @@ var UserDispatchContext = React.createContext();
 export const apiUrl = "https://onon-api.herokuapp.com";
 //export const apiUrl = "http://localhost:5000";
 
-export { UserProvider, useUserState, useUserDispatch, loginUser, resetPassword, changePassword, changeEmail, inviteFriend, signOut };
+export { 
+  UserProvider, 
+  useUserState, 
+  useUserDispatch, 
+  loginUser,
+  registerUser,
+  getUserData, 
+  resetPassword, 
+  changePassword, 
+  changeEmail, 
+  inviteFriend, 
+  signOut };
 
-
+// ############### Authentification handling and routing ################
 function userReducer(state, action) {
   switch (action.type) {
     case "LOGIN_SUCCESS":
-      console.log("Login success, do something here")
-      return { ...state, isAuthenticated: true };
+      return { ...state, isAuthenticated: true, token: action.token }; // Possibly remove token
     case "SIGN_OUT_SUCCESS":
-      return { ...state, isAuthenticated: false };
+      return { ...state, isAuthenticated: false, token: null };
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -25,6 +35,7 @@ function userReducer(state, action) {
 function UserProvider({ children }) {
   var [state, dispatch] = React.useReducer(userReducer, {
     isAuthenticated: !!localStorage.getItem("id_token"),
+    token: localStorage.getItem("jwt_token")
   });
 
   return (
@@ -52,7 +63,31 @@ function useUserDispatch() {
   return context;
 }
 
-// ###########################################################
+// ################### Handles login and api requests ################
+
+function registerUser(dispatch, login, password, history, setIsLoading, setError) {
+
+  setIsLoading(true);
+  const url = apiUrl + "/api/register";
+  
+  try {
+    axios.post(url, {login: login, password: password})
+    .then(res => {
+      if (res.status === 200) {
+        var token = res.data.token;
+        localStorage.setItem("id_token", "1");
+        localStorage.setItem("jwt_token", token);
+        dispatch({ type: "LOGIN_SUCCESS", token:token });      // Possibly remove token
+        setIsLoading(false);
+        history.push("/app/dashboard");
+      } else {
+        setIsLoading(false);
+      }
+    });
+  } catch (e) {
+    console.log(e);
+  }
+}
 
 function loginUser(dispatch, login, password, history, setIsLoading, setError) {
   setError(false);
@@ -65,11 +100,11 @@ function loginUser(dispatch, login, password, history, setIsLoading, setError) {
   try {
     axios.post(url, {login: login, password: password})
     .then(res => {
-      console.log(res);
       if (res.status === 200) {
-        console.log("If clause passed")
+        var token = res.data.token;
         localStorage.setItem("id_token", "1");
-        dispatch({ type: "LOGIN_SUCCESS" });      // Set user data
+        localStorage.setItem("jwt_token", token);
+        dispatch({ type: "LOGIN_SUCCESS", token:token });      // Possibly remove token
         setError(null);
         setIsLoading(false);
         history.push("/app/dashboard");
@@ -82,6 +117,22 @@ function loginUser(dispatch, login, password, history, setIsLoading, setError) {
     console.log(e);
   }
 }
+
+function getUserData (token, setData, setUser) {
+  const url = apiUrl + '/api/get_user';
+
+  try {
+    axios.post(url, {token:token})
+    .then(res => {
+      if (res.status === 200) {
+        setUser(res.data);
+      }
+    })
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 
 // TODO - Check if email is stored in database
 // If stored in db, send reset link else error

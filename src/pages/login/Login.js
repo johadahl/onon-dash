@@ -18,7 +18,7 @@ import useStyles from "./styles";
 import logo from "./logo.svg";
 
 // context
-import { useUserDispatch, loginUser, resetPassword } from "../../context/UserContext";
+import { useUserDispatch, loginUser, registerUser, resetPassword } from "../../context/UserContext";
 
 function Login(props) {
   var classes = useStyles();
@@ -256,13 +256,12 @@ function Login(props) {
                 ) : (
                   <Button
                     onClick={() =>
-                      loginUser(
+                      registerUser(
                         userDispatch,
                         loginValue,
                         passwordValue,
                         props.history,
                         setIsLoading,
-                        setError,
                       )
                     }
                     disabled={

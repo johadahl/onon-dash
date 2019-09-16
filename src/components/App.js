@@ -14,9 +14,10 @@ import { useUserState } from "../context/UserContext";
 export default function App() {
   // global
   var { isAuthenticated } = useUserState();
+  var { token } = useUserState();
 
   // TODO: Handle user authentification
-//  const [user, setUser] = useState({fname: "", lname:"", afnr:""})
+  // const [user, setUser] = useState({fname: "", lname:"", afnr:""})
 
   return (
     <HashRouter>
@@ -32,25 +33,16 @@ export default function App() {
 
   // #######################################################################
 
-  function PrivateRoute({ component, ...rest }) {
+  function PrivateRoute({ component: Component, ...rest }) {
     return (
-      <Route
-        {...rest}
-        render={props =>
-          isAuthenticated ? (
-            React.createElement(component, props)
-          ) : (
-            <Redirect
-              to={{
-                pathname: "/login",
-                state: {
-                  from: props.location,
-                },
-              }}
-            />
-          )
+      <Route {...rest} render={props => {
+        if (isAuthenticated) {
+          return <Component {...props} token={token}/>
         }
-      />
+        else {
+          return <Redirect to={{ pathname: "/login", state: {from: props.location } }} />
+        }
+      }}/>
     );
   }
 

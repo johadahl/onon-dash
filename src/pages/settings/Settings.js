@@ -66,7 +66,7 @@ export default function Settings(props) {
               value={loginValue}
               onChange={e => setLoginValue(e.target.value)}
               margin="normal"
-              placeholder={"Nuvarande:" + props.user.email}
+              placeholder={"Nuvarande:" + props.user.login}
               type="email"
               fullWidth
             />
