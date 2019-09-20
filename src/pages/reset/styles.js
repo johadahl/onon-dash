@@ -1,12 +1,6 @@
 import { makeStyles } from "@material-ui/styles";
 
 export default makeStyles(theme => ({
-  paper: {
-    padding: theme.spacing(3, 2),
-  },
-  formControl: {
-    display: "flex", 
-  },
   container: {
     height: "100vh",
     width: "100vw",
@@ -63,7 +57,8 @@ export default makeStyles(theme => ({
     fontSize: 18,
   },
   greeting: {
-    textAlign: "left",
+    fontWeight: 500,
+    textAlign: "center",
     marginTop: theme.spacing(4),
   },
   subGreeting: {
@@ -127,5 +122,13 @@ export default makeStyles(theme => ({
   },
   loginLoader: {
     marginLeft: theme.spacing(4),
+  },
+  copyright: {
+    marginTop: theme.spacing(4),
+    whiteSpace: "nowrap",
+    [theme.breakpoints.up("md")]: {
+      position: "absolute",
+      bottom: theme.spacing(2),
+    },
   },
 }));

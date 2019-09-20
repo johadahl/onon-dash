@@ -74,7 +74,7 @@ export default function Header(props) {
         </Typography>
         <div className={classes.grow} />
         <Typography variant="h6" weight="medium" className={classes.logotype}>
-          {props.user.fname} {props.user.lname} - {props.user.afnr}
+          {props.user.data.name}
         </Typography>
         <Tooltip title="Logga ut">
           <IconButton

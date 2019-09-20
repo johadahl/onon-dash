@@ -29,7 +29,7 @@ export default function Error() {
           404
         </Typography>
         <Typography variant="h5" color="primary" className={classes.textRow}>
-          Oops. Looks like the page you're looking for no longer exists
+          Sidan du letar efter finns inte...
         </Typography>
         <Typography
           variant="h6"
@@ -37,7 +37,7 @@ export default function Error() {
           colorBrightness="secondary"
           className={classnames(classes.textRow, classes.safetyText)}
         >
-          But we're here to bring you back to safety
+          Men klicka här för att komma tillbaka!
         </Typography>
         <Button
           variant="contained"
@@ -47,7 +47,7 @@ export default function Error() {
           size="large"
           className={classes.backButton}
         >
-          Back to Home
+          Ta mig tillbaka
         </Button>
       </Paper>
     </Grid>

@@ -7,6 +7,7 @@ import Layout from "./Layout";
 // pages
 import Error from "../pages/error";
 import Login from "../pages/login";
+import Reset from "../pages/reset";
 
 // context
 import { useUserState } from "../context/UserContext";
@@ -26,6 +27,7 @@ export default function App() {
         <Route exact path="/app" render={() => <Redirect to="/app/dashboard" />} />
         <PrivateRoute path="/app" component={Layout} />
         <PublicRoute path="/login" component={Login} />
+        <PublicRoute path="/reset" component={Reset} />
         <Route component={Error} />
       </Switch>
     </HashRouter>

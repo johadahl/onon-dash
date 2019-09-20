@@ -8,6 +8,8 @@ import {
   Tab,
   TextField,
   Fade,
+  Snackbar,
+  IconButton,
 } from "@material-ui/core";
 import { withRouter } from "react-router-dom";
 
@@ -16,6 +18,8 @@ import useStyles from "./styles";
 
 // logo
 import logo from "./logo.svg";
+
+import CloseIcon from '@material-ui/icons/Close';
 
 // context
 import { useUserDispatch, loginUser, registerUser, resetPassword } from "../../context/UserContext";
@@ -29,12 +33,20 @@ function Login(props) {
   // local
   var [isLoading, setIsLoading] = useState(false);
   var [forgotten, setForgotten] = useState(false);
-  var [error, setError] = useState(false);
   var [activeTabId, setActiveTabId] = useState(0);
   var [loginValue, setLoginValue] = useState("");
   var [passwordValue, setPasswordValue] = useState("");
-  var [passwordCheckValue, setPasswordCheckValue] = useState("");
 
+  // local
+  var [notification, setNotification] = useState(false);
+  var [notificationMessage, setNotificationMessage] = useState("");
+
+  function handleClose(event, reason) {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setNotification(false);
+  }
 
   return (
     <Grid container className={classes.container}>
@@ -44,17 +56,7 @@ function Login(props) {
       </div>
       <div className={classes.formContainer}>
         <div className={classes.form}>
-          <Tabs
-            value={activeTabId}
-            onChange={(e, id) => setActiveTabId(id)}
-            indicatorColor="primary"
-            textColor="primary"
-            centered
-          >
-            <Tab label="Logga in" classes={{ root: classes.tab }} />
-            <Tab label="Ny användare" classes={{ root: classes.tab }} />
-          </Tabs>
-          {activeTabId === 0 && !forgotten && (
+          {!forgotten && (
             <React.Fragment>
               <Typography variant="h1" className={classes.greeting}>
                 Välkommen!
@@ -62,11 +64,6 @@ function Login(props) {
               <Typography variant="h2" className={classes.subGreeting}>
                 Logga in nedan
               </Typography>
-              <Fade in={error}>
-                <Typography color="secondary" className={classes.errorMessage}>
-                  Något är fel med ditt användarnamn eller lösenord, försök igen!
-                </Typography>
-              </Fade>
               <TextField
                 id="email"
                 InputProps={{
@@ -112,7 +109,8 @@ function Login(props) {
                         passwordValue,
                         props.history,
                         setIsLoading,
-                        setError,
+                        setNotification,
+                        setNotificationMessage,
                       )
                     }
                     variant="contained"
@@ -133,16 +131,11 @@ function Login(props) {
               </div>
             </React.Fragment>
           )}
-          {activeTabId === 0 && forgotten && (
+          {forgotten && (
             <React.Fragment>
               <Typography variant="h2" className={classes.greeting}>
                 Glömt ditt lösenord?
               </Typography>
-              <Fade in={error}>
-              <Typography color="secondary" className={classes.errorMessage}>
-                  Angiven e-postadress finns inte registrerad.
-                </Typography>
-              </Fade>
               <TextField
                 id="email"
                 InputProps={{
@@ -170,9 +163,9 @@ function Login(props) {
                       resetPassword(
                         userDispatch,
                         loginValue,
-                        props.history,
                         setIsLoading,
-                        setError,
+                        setNotification,
+                        setNotificationMessage,
                       )
                     }
                     variant="contained"
@@ -193,100 +186,37 @@ function Login(props) {
               </div>
             </React.Fragment>
           )}
-          {activeTabId === 1 && (
-            <React.Fragment>
-              <Typography variant="h2" className={classes.subGreeting}>
-                Skapa ett konto
-              </Typography>
-              <Fade in={error}>
-                <Typography color="secondary" className={classes.errorMessage}>
-                  Något gick fel vid registreringen.
-                  <br/>
-                  Ange den e-postadress som är kopplad mot tjänst X sedan tidigare.
-                </Typography>
-              </Fade>
-              <TextField
-                id="email"
-                InputProps={{
-                  classes: {
-                    underline: classes.textFieldUnderline,
-                    input: classes.textField,
-                  },
-                }}
-                value={loginValue}
-                onChange={e => setLoginValue(e.target.value)}
-                margin="normal"
-                placeholder="E-postadress"
-                type="email"
-                fullWidth
-              />
-              <TextField
-                id="password"
-                InputProps={{
-                  classes: {
-                    underline: classes.textFieldUnderline,
-                    input: classes.textField,
-                  },
-                }}
-                value={passwordValue}
-                onChange={e => setPasswordValue(e.target.value)}
-                margin="normal"
-                placeholder="Lösenord"
-                type="password"
-                fullWidth
-              />
-              <TextField
-                id="passwordCheck"
-                InputProps={{
-                  classes: {
-                    underline: classes.textFieldUnderline,
-                    input: classes.textField,
-                  },
-                }}
-                value={passwordCheckValue}
-                onChange={e => setPasswordCheckValue(e.target.value)}
-                margin="normal"
-                placeholder="Upprepa lösenord"
-                type="password"
-                fullWidth
-              />
-              <div className={classes.creatingButtonContainer}>
-                {isLoading ? (
-                  <CircularProgress size={26} />
-                ) : (
-                  <Button
-                    onClick={() =>
-                      registerUser(
-                        userDispatch,
-                        loginValue,
-                        passwordValue,
-                        props.history,
-                        setIsLoading,
-                      )
-                    }
-                    disabled={
-                      loginValue.length === 0 ||
-                      passwordValue.length === 0 ||
-                      passwordCheckValue === 0 ||
-                      passwordCheckValue !== passwordValue
-                    }
-                    size="large"
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    className={classes.createAccountButton}
-                  >
-                    Skapa ditt konto
-                  </Button>
-                )}
-              </div>
-            </React.Fragment>
-          )}
-        </div>
+          </div>
         <Typography color="primary" className={classes.copyright}>
           2019 ONON AB.
         </Typography>
       </div>
+
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        open={notification}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        ContentProps={{
+          'aria-describedby': 'message-id',
+        }}
+        message={<span id="message-id">{notificationMessage}</span>}
+        action={[
+          <IconButton
+            key="close"
+            aria-label="close"
+            color="inherit"
+            className={classes.close}
+            onClick={handleClose}
+          >
+            <CloseIcon />
+          </IconButton>,
+        ]}
+      />
+
     </Grid>
   );
 }

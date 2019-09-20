@@ -3,20 +3,20 @@ import axios from "axios";
 
 var UserStateContext = React.createContext();
 var UserDispatchContext = React.createContext();
-export const apiUrl = "https://onon-api.herokuapp.com";
-//export const apiUrl = "http://localhost:5000";
+//export const apiUrl = "https://onon-api.herokuapp.com";
+export const apiUrl = "http://localhost:5000";
 
 export { 
   UserProvider, 
   useUserState, 
   useUserDispatch, 
   loginUser,
-  registerUser,
   getUserData, 
-  resetPassword, 
+  resetPassword,
+  setNewPassword, 
   changePassword, 
   changeEmail, 
-  inviteFriend, 
+  inviteUser, 
   signOut };
 
 // ############### Authentification handling and routing ################
@@ -63,69 +63,68 @@ function useUserDispatch() {
   return context;
 }
 
-// ################### Handles login and api requests ################
+// ################### Handles api requests ################
 
-function registerUser(dispatch, login, password, history, setIsLoading, setError) {
-
-  setIsLoading(true);
-  const url = apiUrl + "/api/register";
-  
-  try {
-    axios.post(url, {login: login, password: password})
-    .then(res => {
-      if (res.status === 200) {
-        var token = res.data.token;
-        localStorage.setItem("id_token", "1");
-        localStorage.setItem("jwt_token", token);
-        dispatch({ type: "LOGIN_SUCCESS", token:token });      // Possibly remove token
-        setIsLoading(false);
-        history.push("/app/dashboard");
-      } else {
-        setIsLoading(false);
-      }
-    });
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-function loginUser(dispatch, login, password, history, setIsLoading, setError) {
-  setError(false);
+// ################### ACCOUNT SETTINGS 
+function loginUser(dispatch, login, password, history, setIsLoading, setNotification, setNotificationMessage) {
   setIsLoading(true);
 
   // Payload
-  const url = apiUrl + "/api/login";
+  const url = apiUrl + "/account/login";
+  const payload = {login: login, password: password}
 
   // Contact api and handle response
   try {
-    axios.post(url, {login: login, password: password})
+    axios.post(url, payload)
     .then(res => {
       if (res.status === 200) {
         var token = res.data.token;
         localStorage.setItem("id_token", "1");
         localStorage.setItem("jwt_token", token);
-        dispatch({ type: "LOGIN_SUCCESS", token:token });      // Possibly remove token
-        setError(null);
+        dispatch({ type: "LOGIN_SUCCESS", token:token });
+        setNotification(true);
+        setNotificationMessage(res.data.message);
         setIsLoading(false);
         history.push("/app/dashboard");
+      } 
+    })
+    .catch(err => {
+      setIsLoading(false);
+      setNotification(true);
+      if (err.response.data.message) {
+        setNotificationMessage(err.response.data.message);
       } else {
-        setError(true);
-        setIsLoading(false);
+        setNotificationMessage("Något gick fel")
       }
-    });
+    })
   } catch (e) {
     console.log(e);
   }
 }
 
-function getUserData (token, setData, setUser) {
-  const url = apiUrl + '/api/get_user';
+// TODO: Backend implementation
+function inviteUser (token, type, afnr, name, inviteValue, setNotification, setNotificationMessage, setName, setInviteValue) {
+  // Payload
+  const url = apiUrl + '/account/invite';
+  const payload = {type:type, afnr:afnr, name:name, login:inviteValue}
+  const config = {'headers': {'Authorization': 'Bearer ' + token}}
 
   try {
-    axios.post(url, {token:token})
+    axios.post(url, payload, config)
     .then(res => {
       if (res.status === 200) {
-        setUser(res.data);
+        setNotification(true);
+        setNotificationMessage(res.data.message);
+        setName("");
+        setInviteValue("");
+      }
+    })
+    .catch(err => {
+      setNotification(true);
+      if (err.response.data.message) {
+        setNotificationMessage(err.response.data.message);
+      } else {
+        setNotificationMessage("Något gick fel")
       }
     })
   } catch (e) {
@@ -134,29 +133,103 @@ function getUserData (token, setData, setUser) {
 }
 
 
-// TODO - Check if email is stored in database
-// If stored in db, send reset link else error
-function resetPassword (dispatch, login, history, setNotification, setNotificationMessage) {
-  console.log(login);
+// Function called from APP_URL/login, Backend will send email to registred user with details on how to reset password
+function resetPassword (dispatch, username, setIsLoading, setNotification, setNotificationMessage) {
+  console.log("Reset Password");
   setNotification(true);
+  setNotificationMessage("Funktion ej tillgänglig");
+  setIsLoading(false);
 }
 
-function changePassword (dispatch, password, history, setNotification, setNotificationMessage) {
+// Function called from APP_URL/reset/{generated_token}
+function setNewPassword (dispatch, password, setIsLoading, setNotification, setNotificationMessage, path, history) {
+  console.log("Set new password");
+
+  // Payload
+  const url = apiUrl + '/account/setpw';
+  const payload = {token:path.substring(1), password:password}
+
+  try {
+    axios.post(url, payload)
+    .then(res => {
+      if (res.status === 200) {
+        setIsLoading(false);
+        setNotification(true);
+        setNotificationMessage(res.data.message);
+        var token = res.data.token;
+        localStorage.setItem("id_token", "1");
+        localStorage.setItem("jwt_token", token);
+        dispatch({ type: "LOGIN_SUCCESS", token:token });
+        history.push("/app/dashboard");
+      }
+    })
+    .catch(err => {
+      setNotification(true); 
+      if (err.response.data.message) {
+        setNotificationMessage(err.response.data.message);
+      } else {
+        setNotificationMessage("Något gick fel")
+      }
+    })
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+function changePassword (token, password, setNotification, setNotificationMessage) {
   console.log("Change Password");
-  setNotificationMessage("Lösenord uppdaterat");
-  setNotification(true);
+
+  // Payload
+  const url = apiUrl + '/account/changepw';
+  const payload = {password:password};
+  const config = {'headers': {'Authorization': 'Bearer ' + token}}
+
+  try {
+    axios.post(url, payload, config)
+    .then(res => {
+      if (res.status === 200) {
+        setNotification(true);
+        setNotificationMessage(res.data.message);
+      }
+    })
+    .catch(err => {
+      setNotification(true); 
+      if (err.response.data.message) {
+        setNotificationMessage(err.response.data.message);
+      } else {
+        setNotificationMessage("Något gick fel")
+      }
+    })
+  } catch (e) {
+    console.log(e);
+  }
 }
 
-function changeEmail (dispatch, login, history, setNotification, setNotificationMessage) {
+function changeEmail (login, history, setNotification, setNotificationMessage) {
   console.log("Change Email");
-  setNotificationMessage("E-postadress ändrad");
   setNotification(true);
+  setNotificationMessage("Funktion ej tillgänglig ännu");
 }
 
-function inviteFriend (dispatch, login, history, setNotification, setNotificationMessage) {
-  console.log("Change Email");
-  setNotificationMessage("Inbjudan skickad");
-  setNotification(true);
+// ################### DATA API CALLS
+
+// Retrieves user account data
+function getUserData (token, setUser) {
+  // Payload
+  const url = apiUrl + '/api/get_user';
+  const payload = {}
+  const config = {'headers': {'Authorization': 'Bearer ' + token}}
+
+  try {
+    axios.post(url, payload, config)
+    .then(res => {
+      if (res.status === 200) {
+        setUser({data: res.data.data});
+      }
+    })
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function signOut(dispatch, history) {

@@ -27,32 +27,16 @@ import { useLayoutState } from "../../context/LayoutContext";
 import { getUserData} from "../../context/UserContext";
 
 function Layout(props) {
-  var classes = useStyles();
-
   // global
   var layoutState = useLayoutState();
+  var classes = useStyles();
 
-  const [data, setData] = useState({data: [], isFetching: false});
-  const [user, setUser] = useState({fname: "", lname:"", afnr:""})
+  // local
+  const [user, setUser] = useState({data: []});
 
-  // TODO: This api call should be done as a service
   useEffect(() => {
-    getUserData(props.token, setData, setUser);
-/*    const fetchUser = async () => {
-      try {
-        const user = await axios.get( apiUrl + '/api/get_user');
-        setUser(user.data);
-      } catch (e) {
-        console.log(e);
-      setData({data: data.users, isFetching: false});
-      }
-    };
-    fetchUser();
-  }, 
-*/
-  
+    getUserData(props.token, setUser);  
   }, []);
-
 
   return (
     <div className={classes.root}>
@@ -65,7 +49,6 @@ function Layout(props) {
             })}
           >
             <div className={classes.fakeToolbar} />
-            {props.token}
             <Switch>
               <Route path="/app/dashboard" render={(props) => <Dashboard {...props} user={user} />}/>
               <Route path="/app/af" component={Af} />
