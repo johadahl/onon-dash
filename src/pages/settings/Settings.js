@@ -34,9 +34,6 @@ export default function Settings(props) {
   var classes = useStyles();
   var token = useUserState().token;
 
-// local general
-  var [notification, setNotification] = useState(false);
-  var [notificationMessage, setNotificationMessage] = useState("");
 // local for invite
   var [type, setType] = useState("sales");
   var [afnr, setAfnr] = useState([]);
@@ -47,12 +44,16 @@ export default function Settings(props) {
   var [passwordValue, setPasswordValue] = useState("");
   var [passwordCheckValue, setPasswordCheckValue] = useState("");
 
+// For snackbar
+  var [notification, setNotification] = useState(false);
+  var [notificationMessage, setNotificationMessage] = useState("");
+
 //local, for account type information popper
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popper' : undefined;
 
-// Handles account type information
+// Handles account type information popper
   function handleClick(event) {
     setAnchorEl(anchorEl ? null : event.currentTarget);
   }
@@ -122,6 +123,7 @@ export default function Settings(props) {
               {props.user.data.type === "sales" && (
                 <React.Fragment>
                   <Select
+                    disabled
                     value={type}
                     onChange={e => setType(e.target.value)}
                     InputProps={{classes: { underline: classes.textFieldUnderline, input: classes.textField, width:'100px'}}}
@@ -202,6 +204,7 @@ export default function Settings(props) {
                   margin="normal"
                   type="text"
                   fullWidth
+                  disabled
                 />
               </React.Fragment>
             )}
@@ -227,29 +230,56 @@ export default function Settings(props) {
               fullWidth
             />
             <div className={classes.formButtons}>
-              <Button
-                disabled={
-                  inviteValue.length === 0 ||
-                  name.length === 0}
-                onClick={() =>
-                  inviteUser(
-                    token,
-                    type,
-                    afnr,
-                    name,
-                    inviteValue,
-                    setNotification,
-                    setNotificationMessage,
-                    setName,
-                    setInviteValue,
-                  )
-                }
-                variant="contained"
-                color="primary"
-                size="large"
-              >
-              Skicka
-              </Button>
+              {["admin", "president"].includes(props.user.data.type) && (
+                <Button
+                  disabled={
+                    inviteValue.length === 0 ||
+                    name.length === 0}
+                  onClick={() =>
+                    inviteUser(
+                      token,
+                      type,
+                      afnr,
+                      name,
+                      inviteValue,
+                      setNotification,
+                      setNotificationMessage,
+                      setName,
+                      setInviteValue,
+                    )
+                  }
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                >
+                Skicka
+                </Button>
+              )}
+              {["ceo", "sales"].includes(props.user.data.type) && (
+                <Button
+                  disabled={
+                    inviteValue.length === 0 ||
+                    name.length === 0}
+                  onClick={() =>
+                    inviteUser(
+                      token,
+                      type,
+                      props.user.data.afnr,
+                      name,
+                      inviteValue,
+                      setNotification,
+                      setNotificationMessage,
+                      setName,
+                      setInviteValue,
+                    )
+                  }
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                >
+                Skicka
+                </Button>
+              )}
             </div>
           </Widget>
         </Grid>

@@ -40,6 +40,9 @@ export default makeStyles(theme => ({
     flexDirection: "column",
     justifyContent: "space-between",
   },
+  table: {
+    minWidth: 200,
+  },
   tableWidget: {
     overflowX: "auto",
   },
