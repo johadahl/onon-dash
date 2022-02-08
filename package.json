@@ -9,7 +9,7 @@
     "apexcharts": "^3.8.3",
     "aws-sdk": "^2.528.0",
     "axios": "^0.21.2",
-    "bcrypt": "^3.0.6",
+    "bcrypt": "^5.0.0",
     "classnames": "^2.2.6",
     "font-awesome": "^4.7.0",
     "mui-datatables": "^2.6.4",
